@@ -12,7 +12,7 @@ use Illuminate\Http\Response;
 class AffectationController extends ApiController
 {
     /** @var array<int, string> */
-    private array $allowedIncludes = ['groupe', 'module', 'formateur', 'seances', 'seances.dateSeance'];
+    private array $allowedIncludes = ['groupe', 'module', 'formateur', 'seances', 'seances.timeRange'];
 
     public function index(Request $request)
     {

@@ -13,17 +13,21 @@ class AnneeFactory extends Factory
 
     public function definition(): array
     {
-        $startYear = (int) now()->subYears($this->faker->numberBetween(0, 2))->format('Y');
-        $endYear = $startYear + 1;
-
         return [
             'filiere_code' => Filiere::factory(),
-            'libelle' => $this->faker->randomElement([
-                $startYear . '/' . $endYear,
-                'Year 1',
-                'Year 2',
-            ]),
+            // Deterministic default; the seeder should override using states/sequences.
+            'libelle' => '1ère année - Tronc commun',
         ];
+    }
+
+    public function firstYearCommon(): static
+    {
+        return $this->state(fn () => ['libelle' => '1ère année - Tronc commun']);
+    }
+
+    public function optionSecondYear(string $option): static
+    {
+        return $this->state(fn () => ['libelle' => '2ème année - ' . $option]);
     }
 }
 

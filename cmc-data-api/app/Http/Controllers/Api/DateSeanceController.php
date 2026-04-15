@@ -2,54 +2,38 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\DateSeance\StoreDateSeanceRequest;
-use App\Http\Requests\DateSeance\UpdateDateSeanceRequest;
-use App\Http\Resources\DateSeanceResource;
-use App\Models\DateSeance;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class DateSeanceController extends ApiController
 {
-    /** @var array<int, string> */
-    private array $allowedIncludes = ['seance', 'seance.affectation'];
-
-    public function index(Request $request)
+    /**
+     * Legacy endpoint: DateSeance was removed in favor of Seance(date + time_range_id).
+     */
+    public function index()
     {
-        $query = DateSeance::query()->orderBy('date');
-        $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
-
-        return DateSeanceResource::collection($this->paginate($request, $query));
+        return response()->json([
+            'message' => 'date-seances is deprecated. Use seances (date + time_range_id) and time-ranges instead.',
+        ], Response::HTTP_GONE);
     }
 
-    public function show(Request $request, DateSeance $dateSeance)
+    public function show()
     {
-        $dateSeance->load($this->requestedIncludes($request, $this->allowedIncludes));
-
-        return new DateSeanceResource($dateSeance);
+        return $this->index();
     }
 
-    public function store(StoreDateSeanceRequest $request)
+    public function store()
     {
-        $dateSeance = DateSeance::query()->create($request->validated());
-
-        return (new DateSeanceResource($dateSeance))
-            ->response()
-            ->setStatusCode(Response::HTTP_CREATED);
+        return $this->index();
     }
 
-    public function update(UpdateDateSeanceRequest $request, DateSeance $dateSeance)
+    public function update()
     {
-        $dateSeance->update($request->validated());
-
-        return new DateSeanceResource($dateSeance);
+        return $this->index();
     }
 
-    public function destroy(DateSeance $dateSeance)
+    public function destroy()
     {
-        $dateSeance->delete();
-
-        return response()->noContent();
+        return $this->index();
     }
 }
 

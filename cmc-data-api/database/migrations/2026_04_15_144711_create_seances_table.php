@@ -15,9 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('affectation_id')->constrained('affectations')->cascadeOnDelete();
             $table->string('type', 32)->default('cours');
+            $table->date('date')->index();
+            $table->foreignId('time_range_id')->constrained('time_ranges')->restrictOnDelete();
             $table->timestamps();
 
             $table->index(['affectation_id', 'type']);
+            $table->index(['date', 'time_range_id']);
         });
     }
 

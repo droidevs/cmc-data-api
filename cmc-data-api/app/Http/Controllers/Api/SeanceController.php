@@ -12,12 +12,12 @@ use Illuminate\Http\Response;
 class SeanceController extends ApiController
 {
     /** @var array<int, string> */
-    private array $allowedIncludes = ['affectation', 'dateSeance', 'notes', 'notes.stagiaire'];
+    private array $allowedIncludes = ['affectation', 'timeRange', 'notes', 'notes.stagiaire'];
 
     public function index(Request $request)
     {
         $query = Seance::query()->orderBy('id');
-        $query->with(['affectation', 'dateSeance']);
+        $query->with(['affectation', 'timeRange']);
         $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
 
         return SeanceResource::collection($this->paginate($request, $query));
@@ -26,7 +26,7 @@ class SeanceController extends ApiController
     public function show(Request $request, Seance $seance)
     {
         $seance->load(array_values(array_unique(array_merge(
-            ['affectation', 'dateSeance'],
+            ['affectation', 'timeRange'],
             $this->requestedIncludes($request, $this->allowedIncludes)
         ))));
 
@@ -37,7 +37,7 @@ class SeanceController extends ApiController
     {
         $seance = Seance::query()->create($request->validated());
 
-        return (new SeanceResource($seance->load(['affectation', 'dateSeance'])))
+        return (new SeanceResource($seance->load(['affectation', 'timeRange'])))
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }
@@ -46,7 +46,7 @@ class SeanceController extends ApiController
     {
         $seance->update($request->validated());
 
-        return new SeanceResource($seance->load(['affectation', 'dateSeance']));
+        return new SeanceResource($seance->load(['affectation', 'timeRange']));
     }
 
     public function destroy(Seance $seance)

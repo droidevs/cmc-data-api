@@ -7,6 +7,7 @@ use App\Models\Formateur;
 use App\Models\Groupe;
 use App\Models\Module;
 use App\Models\Seance;
+use App\Models\TimeRange;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
 
@@ -44,11 +45,18 @@ class PlanningSeeder extends Seeder
                         'mode' => Arr::random(['presentiel', 'synchrone', 'async']),
                     ]);
 
-                // 5 seances per affectation, each with 1 date
+                $timeRanges = TimeRange::query()->get();
+                if ($timeRanges->isEmpty()) {
+                    $timeRanges = TimeRange::factory()->count(4)->create();
+                }
+
+                // 5 seances per affectation with (date + time_range)
                 Seance::factory()
                     ->count(5)
                     ->for($affectation)
-                    ->hasDateSeance(1)
+                    ->state(fn () => [
+                        'time_range_id' => $timeRanges->random()->getKey(),
+                    ])
                     ->create();
             }
         });

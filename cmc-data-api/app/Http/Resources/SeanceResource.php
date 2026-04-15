@@ -15,11 +15,13 @@ class SeanceResource extends JsonResource
             'id' => $this->id,
             'affectation_id' => $this->affectation_id,
             'type' => $this->type,
+            'date' => $this->date,
+            'time_range_id' => $this->time_range_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
 
             'affectation' => new AffectationResource($this->whenLoaded('affectation')),
-            'date_seance' => new DateSeanceResource($this->whenLoaded('dateSeance')),
+            'time_range' => new TimeRangeResource($this->whenLoaded('timeRange')),
             'notes' => NoteResource::collection($this->whenLoaded('notes')),
         ];
     }

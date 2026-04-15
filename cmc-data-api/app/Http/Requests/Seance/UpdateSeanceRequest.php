@@ -19,6 +19,8 @@ class UpdateSeanceRequest extends FormRequest
         return [
             'affectation_id' => ['required', 'integer', 'exists:affectations,id'],
             'type' => $this->seanceTypeRules(false),
+            'date' => ['required', 'date'],
+            'time_range_id' => ['required', 'integer', 'exists:time_ranges,id'],
         ];
     }
 }

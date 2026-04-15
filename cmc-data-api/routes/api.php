@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Api\AffectationController;
 use App\Http\Controllers\Api\AnneeController;
-use App\Http\Controllers\Api\DateSeanceController;
 use App\Http\Controllers\Api\EspaceController;
 use App\Http\Controllers\Api\FiliereController;
 use App\Http\Controllers\Api\FormateurController;
@@ -13,6 +12,7 @@ use App\Http\Controllers\Api\NoteController;
 use App\Http\Controllers\Api\PoleController;
 use App\Http\Controllers\Api\SeanceController;
 use App\Http\Controllers\Api\StagiaireController;
+use App\Http\Controllers\Api\TimeRangeController;
 use App\Http\Controllers\Api\TypeFormationController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,7 +28,7 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('modules', ModuleController::class)->parameters(['modules' => 'module']);
     Route::apiResource('affectations', AffectationController::class);
     Route::apiResource('seances', SeanceController::class);
-    Route::apiResource('date-seances', DateSeanceController::class);
+    Route::apiResource('time-ranges', TimeRangeController::class);
     Route::apiResource('stagiaires', StagiaireController::class)->parameters(['stagiaires' => 'stagiaire']);
     Route::apiResource('notes', NoteController::class);
 });

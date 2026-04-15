@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Faker\Factory as FakerFactory;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,11 +15,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Optional reproducibility. Change/remove if you want full randomness.
+        FakerFactory::create()->seed(20260415);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            ReferenceSeeder::class,
+            AcademicStructureSeeder::class,
+            UsersSeeder::class,
+            PlanningSeeder::class,
+            EvaluationSeeder::class,
         ]);
     }
 }

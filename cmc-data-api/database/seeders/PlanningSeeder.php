@@ -15,7 +15,12 @@ class PlanningSeeder extends Seeder
 {
     public function run(): void
     {
-        Groupe::query()->with(['annee.filiere'])->get()->each(function (Groupe $groupe) {
+        $timeRanges = TimeRange::query()->get();
+        if ($timeRanges->isEmpty()) {
+            $timeRanges = TimeRange::factory()->count(4)->create();
+        }
+
+        Groupe::query()->with(['annee.filiere'])->get()->each(function (Groupe $groupe) use ($timeRanges) {
             $modules = Module::query()->where('annee_id', $groupe->annee_id)->get();
             if ($modules->isEmpty()) {
                 return;
@@ -45,10 +50,6 @@ class PlanningSeeder extends Seeder
                         'mode' => Arr::random(['presentiel', 'synchrone', 'async']),
                     ]);
 
-                $timeRanges = TimeRange::query()->get();
-                if ($timeRanges->isEmpty()) {
-                    $timeRanges = TimeRange::factory()->count(4)->create();
-                }
 
                 // 5 seances per affectation with (date + time_range)
                 Seance::factory()

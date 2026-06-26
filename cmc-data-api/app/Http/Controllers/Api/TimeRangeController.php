@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Filters\TimeRangeFilter;
+use App\Http\Requests\Filters\TimeRangeFilterRequest;
 use App\Http\Resources\TimeRangeResource;
 use App\Models\TimeRange;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class TimeRangeController extends ApiController
     /** @var array<int, string> */
     private array $allowedIncludes = ['seances'];
 
-    public function index(Request $request)
+    public function index(TimeRangeFilterRequest $request)
     {
         $query = TimeRange::query()->orderBy('start_time');
         $this->withFilters($request, $query, TimeRangeFilter::class);

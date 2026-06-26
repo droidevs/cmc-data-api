@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Filters\AffectationFilter;
 use App\Http\Requests\Affectation\StoreAffectationRequest;
 use App\Http\Requests\Affectation\UpdateAffectationRequest;
+use App\Http\Requests\Filters\AffectationFilterRequest;
 use App\Http\Resources\AffectationResource;
 use App\Models\Affectation;
 use Illuminate\Http\Request;
@@ -25,7 +26,7 @@ class AffectationController extends ApiController
         'groupe.annee.filiere',
     ];
 
-    public function index(Request $request)
+    public function index(AffectationFilterRequest $request)
     {
         $query = Affectation::query()->orderBy('id');
         $query->with(['groupe', 'module', 'formateur']);

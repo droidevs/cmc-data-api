@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Filters\PoleFilter;
+use App\Http\Requests\Filters\PoleFilterRequest;
 use App\Http\Resources\PoleResource;
 use App\Models\Pole;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class PoleController extends ApiController
     /** @var array<int, string> */
     private array $allowedIncludes = ['espaces', 'formateurs', 'filieres'];
 
-    public function index(Request $request)
+    public function index(PoleFilterRequest $request)
     {
         $query = Pole::query()->orderBy('id');
         $this->withFilters($request, $query, PoleFilter::class);

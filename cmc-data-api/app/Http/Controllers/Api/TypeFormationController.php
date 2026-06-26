@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Filters\TypeFormationFilter;
+use App\Http\Requests\Filters\TypeFormationFilterRequest;
 use App\Http\Resources\TypeFormationResource;
 use App\Models\TypeFormation;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class TypeFormationController extends ApiController
     /** @var array<int, string> */
     private array $allowedIncludes = ['filieres'];
 
-    public function index(Request $request)
+    public function index(TypeFormationFilterRequest $request)
     {
         $query = TypeFormation::query()->orderBy('id');
         $this->withFilters($request, $query, TypeFormationFilter::class);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Filters\EspaceFilter;
+use App\Http\Requests\Filters\EspaceFilterRequest;
 use App\Http\Resources\EspaceResource;
 use App\Models\Espace;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class EspaceController extends ApiController
     /** @var array<int, string> */
     private array $allowedIncludes = ['pole', 'seances'];
 
-    public function index(Request $request)
+    public function index(EspaceFilterRequest $request)
     {
         $query = Espace::query()->orderBy('id');
         $this->withFilters($request, $query, EspaceFilter::class);

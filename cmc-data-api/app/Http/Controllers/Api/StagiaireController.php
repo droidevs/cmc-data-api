@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Filters\StagiaireFilter;
+use App\Http\Requests\Filters\StagiaireFilterRequest;
 use App\Http\Resources\StagiaireResource;
 use App\Models\Stagiaire;
 use Illuminate\Http\Request;
@@ -25,7 +26,7 @@ class StagiaireController extends ApiController
         'notes.seance.affectation.module',
     ];
 
-    public function index(Request $request)
+    public function index(StagiaireFilterRequest $request)
     {
         $query = Stagiaire::query()->orderBy('nom')->orderBy('prenom');
         $this->withFilters($request, $query, StagiaireFilter::class);

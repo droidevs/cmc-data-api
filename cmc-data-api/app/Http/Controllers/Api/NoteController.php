@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Filters\NoteFilter;
+use App\Http\Requests\Filters\NoteFilterRequest;
 use App\Http\Requests\Note\StoreNoteRequest;
 use App\Http\Requests\Note\UpdateNoteRequest;
 use App\Http\Resources\NoteResource;
@@ -23,7 +24,7 @@ class NoteController extends ApiController
         'stagiaire.groupe',
     ];
 
-    public function index(Request $request)
+    public function index(NoteFilterRequest $request)
     {
         $query = Note::query()->orderBy('id');
         $query->with(['seance', 'stagiaire']);

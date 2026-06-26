@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Filters\FiliereFilter;
+use App\Http\Requests\Filters\FiliereFilterRequest;
 use App\Http\Resources\FiliereResource;
 use App\Models\Filiere;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class FiliereController extends ApiController
     /** @var array<int, string> */
     private array $allowedIncludes = ['pole', 'niveau', 'typeFormation', 'annees'];
 
-    public function index(Request $request)
+    public function index(FiliereFilterRequest $request)
     {
         $query = Filiere::query()->orderBy('libelle');
         $this->withFilters($request, $query, FiliereFilter::class);

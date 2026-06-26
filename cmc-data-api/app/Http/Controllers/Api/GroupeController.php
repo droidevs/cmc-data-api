@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Filters\GroupeFilter;
+use App\Http\Requests\Filters\GroupeFilterRequest;
 use App\Http\Requests\Groupe\StoreGroupeRequest;
 use App\Http\Requests\Groupe\UpdateGroupeRequest;
 use App\Http\Resources\GroupeResource;
@@ -15,7 +16,7 @@ class GroupeController extends ApiController
     /** @var array<int, string> */
     private array $allowedIncludes = ['annee', 'stagiaires', 'affectations'];
 
-    public function index(Request $request)
+    public function index(GroupeFilterRequest $request)
     {
         $query = Groupe::query()->orderBy('id');
         $this->withFilters($request, $query, GroupeFilter::class);
@@ -31,4 +32,3 @@ class GroupeController extends ApiController
         return new GroupeResource($groupe);
     }
 }
-

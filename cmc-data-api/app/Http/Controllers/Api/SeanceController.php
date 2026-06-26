@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Filters\SeanceFilter;
+use App\Http\Requests\Filters\SeanceFilterRequest;
 use App\Http\Requests\Seance\StoreSeanceRequest;
 use App\Http\Requests\Seance\UpdateSeanceRequest;
 use App\Http\Resources\SeanceResource;
@@ -25,7 +26,7 @@ class SeanceController extends ApiController
         'notes.stagiaire',
     ];
 
-    public function index(Request $request)
+    public function index(SeanceFilterRequest $request)
     {
         $query = Seance::query()->orderBy('date')->orderBy('time_range_id');
         $query->with(['affectation', 'timeRange']);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Filters\FormateurFilter;
+use App\Http\Requests\Filters\FormateurFilterRequest;
 use App\Http\Resources\FormateurResource;
 use App\Models\Formateur;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class FormateurController extends ApiController
     /** @var array<int, string> */
     private array $allowedIncludes = ['pole', 'affectations', 'affectations.module', 'affectations.groupe'];
 
-    public function index(Request $request)
+    public function index(FormateurFilterRequest $request)
     {
         $query = Formateur::query()->orderBy('nom_prenom');
         $this->withFilters($request, $query, FormateurFilter::class);

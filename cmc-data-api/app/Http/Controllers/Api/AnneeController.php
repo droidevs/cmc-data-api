@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Filters\AnneeFilter;
+use App\Http\Requests\Filters\AnneeFilterRequest;
 use App\Http\Resources\AnneeResource;
 use App\Models\Annee;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class AnneeController extends ApiController
     /** @var array<int, string> */
     private array $allowedIncludes = ['filiere', 'groupes', 'modules'];
 
-    public function index(Request $request)
+    public function index(AnneeFilterRequest $request)
     {
         $query = Annee::query()->orderBy('id');
         $this->withFilters($request, $query, AnneeFilter::class);

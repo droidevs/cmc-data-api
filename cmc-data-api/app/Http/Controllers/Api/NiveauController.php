@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Filters\NiveauFilter;
+use App\Http\Requests\Filters\NiveauFilterRequest;
 use App\Http\Resources\NiveauResource;
 use App\Models\Niveau;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class NiveauController extends ApiController
     /** @var array<int, string> */
     private array $allowedIncludes = ['filieres'];
 
-    public function index(Request $request)
+    public function index(NiveauFilterRequest $request)
     {
         $query = Niveau::query()->orderBy('id');
         $this->withFilters($request, $query, NiveauFilter::class);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Filters\ModuleFilter;
+use App\Http\Requests\Filters\ModuleFilterRequest;
 use App\Http\Resources\ModuleResource;
 use App\Models\Module;
 use Illuminate\Http\Request;
@@ -22,7 +23,7 @@ class ModuleController extends ApiController
         'affectations.formateur',
     ];
 
-    public function index(Request $request)
+    public function index(ModuleFilterRequest $request)
     {
         $query = Module::query()->orderBy('libelle');
         $this->withFilters($request, $query, ModuleFilter::class);

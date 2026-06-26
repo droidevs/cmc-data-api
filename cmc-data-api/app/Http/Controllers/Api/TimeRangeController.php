@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\TimeRange\StoreTimeRangeRequest;
-use App\Http\Requests\TimeRange\UpdateTimeRangeRequest;
+use App\Filters\TimeRangeFilter;
 use App\Http\Resources\TimeRangeResource;
 use App\Models\TimeRange;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
+/**
+ * TimeRange is a reference table managed manually —
+ * no write endpoints are exposed here. Only index/show remain.
+ */
 class TimeRangeController extends ApiController
 {
     /** @var array<int, string> */
@@ -17,6 +19,7 @@ class TimeRangeController extends ApiController
     public function index(Request $request)
     {
         $query = TimeRange::query()->orderBy('start_time');
+        $this->withFilters($request, $query, TimeRangeFilter::class);
         $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
 
         return TimeRangeResource::collection($this->paginate($request, $query));
@@ -28,28 +31,4 @@ class TimeRangeController extends ApiController
 
         return new TimeRangeResource($timeRange);
     }
-
-    public function store(StoreTimeRangeRequest $request)
-    {
-        $timeRange = TimeRange::query()->create($request->validated());
-
-        return (new TimeRangeResource($timeRange))
-            ->response()
-            ->setStatusCode(Response::HTTP_CREATED);
-    }
-
-    public function update(UpdateTimeRangeRequest $request, TimeRange $timeRange)
-    {
-        $timeRange->update($request->validated());
-
-        return new TimeRangeResource($timeRange);
-    }
-
-    public function destroy(TimeRange $timeRange)
-    {
-        $timeRange->delete();
-
-        return response()->noContent();
-    }
 }
-

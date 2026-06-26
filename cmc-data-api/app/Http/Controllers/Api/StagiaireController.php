@@ -2,21 +2,33 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\Stagiaire\StoreStagiaireRequest;
-use App\Http\Requests\Stagiaire\UpdateStagiaireRequest;
+use App\Filters\StagiaireFilter;
 use App\Http\Resources\StagiaireResource;
 use App\Models\Stagiaire;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
+/**
+ * Stagiaire data is sourced from lister_minimized.xlsx and
+ * BasePlateEvaluation.xlsx imports — no write endpoints here.
+ * Only index/show remain.
+ */
 class StagiaireController extends ApiController
 {
     /** @var array<int, string> */
-    private array $allowedIncludes = ['groupe', 'notes', 'notes.seance'];
+    private array $allowedIncludes = [
+        'groupe',
+        'groupe.annee',
+        'groupe.annee.filiere',
+        'notes',
+        'notes.seance',
+        'notes.seance.affectation',
+        'notes.seance.affectation.module',
+    ];
 
     public function index(Request $request)
     {
         $query = Stagiaire::query()->orderBy('nom')->orderBy('prenom');
+        $this->withFilters($request, $query, StagiaireFilter::class);
         $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
 
         return StagiaireResource::collection($this->paginate($request, $query));
@@ -28,28 +40,4 @@ class StagiaireController extends ApiController
 
         return new StagiaireResource($stagiaire);
     }
-
-    public function store(StoreStagiaireRequest $request)
-    {
-        $stagiaire = Stagiaire::query()->create($request->validated());
-
-        return (new StagiaireResource($stagiaire))
-            ->response()
-            ->setStatusCode(Response::HTTP_CREATED);
-    }
-
-    public function update(UpdateStagiaireRequest $request, Stagiaire $stagiaire)
-    {
-        $stagiaire->update($request->validated());
-
-        return new StagiaireResource($stagiaire);
-    }
-
-    public function destroy(Stagiaire $stagiaire)
-    {
-        $stagiaire->delete();
-
-        return response()->noContent();
-    }
 }
-

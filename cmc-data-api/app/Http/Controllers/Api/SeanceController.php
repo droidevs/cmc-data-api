@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Filters\SeanceFilter;
 use App\Http\Requests\Seance\StoreSeanceRequest;
 use App\Http\Requests\Seance\UpdateSeanceRequest;
 use App\Http\Resources\SeanceResource;
@@ -12,12 +13,23 @@ use Illuminate\Http\Response;
 class SeanceController extends ApiController
 {
     /** @var array<int, string> */
-    private array $allowedIncludes = ['affectation', 'timeRange', 'notes', 'notes.stagiaire'];
+    private array $allowedIncludes = [
+        'affectation',
+        'affectation.groupe',
+        'affectation.module',
+        'affectation.formateur',
+        'timeRange',
+        'espace',
+        'espace.pole',
+        'notes',
+        'notes.stagiaire',
+    ];
 
     public function index(Request $request)
     {
-        $query = Seance::query()->orderBy('id');
+        $query = Seance::query()->orderBy('date')->orderBy('time_range_id');
         $query->with(['affectation', 'timeRange']);
+        $this->withFilters($request, $query, SeanceFilter::class);
         $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
 
         return SeanceResource::collection($this->paginate($request, $query));
@@ -37,7 +49,7 @@ class SeanceController extends ApiController
     {
         $seance = Seance::query()->create($request->validated());
 
-        return (new SeanceResource($seance->load(['affectation', 'timeRange'])))
+        return (new SeanceResource($seance->load(['affectation', 'timeRange', 'espace'])))
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }
@@ -46,7 +58,7 @@ class SeanceController extends ApiController
     {
         $seance->update($request->validated());
 
-        return new SeanceResource($seance->load(['affectation', 'timeRange']));
+        return new SeanceResource($seance->load(['affectation', 'timeRange', 'espace']));
     }
 
     public function destroy(Seance $seance)
@@ -56,4 +68,3 @@ class SeanceController extends ApiController
         return response()->noContent();
     }
 }
-

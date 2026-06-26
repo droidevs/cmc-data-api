@@ -2,21 +2,30 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\Module\StoreModuleRequest;
-use App\Http\Requests\Module\UpdateModuleRequest;
+use App\Filters\ModuleFilter;
 use App\Http\Resources\ModuleResource;
 use App\Models\Module;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
+/**
+ * Module data is sourced from AvancementProgramme.xlsx imports —
+ * no write endpoints are exposed here. Only index/show remain.
+ */
 class ModuleController extends ApiController
 {
     /** @var array<int, string> */
-    private array $allowedIncludes = ['annee', 'affectations'];
+    private array $allowedIncludes = [
+        'annee',
+        'annee.filiere',
+        'affectations',
+        'affectations.groupe',
+        'affectations.formateur',
+    ];
 
     public function index(Request $request)
     {
         $query = Module::query()->orderBy('libelle');
+        $this->withFilters($request, $query, ModuleFilter::class);
         $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
 
         return ModuleResource::collection($this->paginate($request, $query));
@@ -28,28 +37,4 @@ class ModuleController extends ApiController
 
         return new ModuleResource($module);
     }
-
-    public function store(StoreModuleRequest $request)
-    {
-        $module = Module::query()->create($request->validated());
-
-        return (new ModuleResource($module))
-            ->response()
-            ->setStatusCode(Response::HTTP_CREATED);
-    }
-
-    public function update(UpdateModuleRequest $request, Module $module)
-    {
-        $module->update($request->validated());
-
-        return new ModuleResource($module);
-    }
-
-    public function destroy(Module $module)
-    {
-        $module->delete();
-
-        return response()->noContent();
-    }
 }
-

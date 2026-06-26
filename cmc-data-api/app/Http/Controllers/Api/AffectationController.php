@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Filters\AffectationFilter;
 use App\Http\Requests\Affectation\StoreAffectationRequest;
 use App\Http\Requests\Affectation\UpdateAffectationRequest;
 use App\Http\Resources\AffectationResource;
@@ -12,13 +13,23 @@ use Illuminate\Http\Response;
 class AffectationController extends ApiController
 {
     /** @var array<int, string> */
-    private array $allowedIncludes = ['groupe', 'module', 'formateur', 'seances', 'seances.timeRange'];
+    private array $allowedIncludes = [
+        'groupe',
+        'module',
+        'formateur',
+        'formateurSyn',
+        'seances',
+        'seances.timeRange',
+        'seances.espace',
+        'groupe.annee',
+        'groupe.annee.filiere',
+    ];
 
     public function index(Request $request)
     {
         $query = Affectation::query()->orderBy('id');
-        // Default eager loading for this central pivot
         $query->with(['groupe', 'module', 'formateur']);
+        $this->withFilters($request, $query, AffectationFilter::class);
         $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
 
         return AffectationResource::collection($this->paginate($request, $query));
@@ -57,4 +68,3 @@ class AffectationController extends ApiController
         return response()->noContent();
     }
 }
-

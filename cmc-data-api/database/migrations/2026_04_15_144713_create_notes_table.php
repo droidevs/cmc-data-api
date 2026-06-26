@@ -1,14 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('notes', function (Blueprint $table) {
@@ -19,6 +18,7 @@ return new class extends Migration
             $table->string('type', 32)->default('cc');
             $table->string('decision', 64)->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('stagiaire_cef')->references('cef')->on('stagiaires')->cascadeOnDelete();
             $table->unique(['seance_id', 'stagiaire_cef', 'type']);
@@ -26,9 +26,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('notes');

@@ -12,20 +12,37 @@ class AffectationResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'groupe_id' => $this->groupe_id,
-            'module_code' => $this->module_code,
-            'formateur_mle' => $this->formateur_mle,
-            'mode' => $this->mode,
-            'mh_affecte' => $this->mh_affecte,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'id'                => $this->id,
+            'groupe_id'         => $this->groupe_id,
+            'module_code'       => $this->module_code,
 
-            'groupe' => new GroupeResource($this->whenLoaded('groupe')),
-            'module' => new ModuleResource($this->whenLoaded('module')),
-            'formateur' => new FormateurResource($this->whenLoaded('formateur')),
-            'seances' => SeanceResource::collection($this->whenLoaded('seances')),
+            // Présentiel trainer (Mle Affecté Présentiel Actif)
+            'formateur_mle'     => $this->formateur_mle,
+
+            // Synchronous trainer (Mle Affecté Syn Actif) — nullable
+            'formateur_mle_syn' => $this->formateur_mle_syn,
+
+            // Mode from AvancementProgramme (Résidentiel | Alternance)
+            'mode'              => $this->mode,
+
+            // Présentiel hours (MH Affectée Présentiel)
+            'mh_affecte'        => $this->mh_affecte,
+
+            // Synchronous hours (MH Affectée Sync) — nullable
+            'mh_affecte_syn'    => $this->mh_affecte_syn,
+
+            // Computed total (mh_affecte + mh_affecte_syn)
+            'mh_totale'         => $this->mh_totale,
+
+            'created_at'        => $this->created_at,
+            'updated_at'        => $this->updated_at,
+
+            // Relationships (loaded on demand)
+            'groupe'            => new GroupeResource($this->whenLoaded('groupe')),
+            'module'            => new ModuleResource($this->whenLoaded('module')),
+            'formateur'         => new FormateurResource($this->whenLoaded('formateur')),
+            'formateur_syn'     => new FormateurResource($this->whenLoaded('formateurSyn')),
+            'seances'           => SeanceResource::collection($this->whenLoaded('seances')),
         ];
     }
 }
-

@@ -12,15 +12,22 @@ class ModuleResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            // Primary key (Code Module from AvancementProgramme)
             'code_module' => $this->code_module,
-            'annee_id' => $this->annee_id,
-            'libelle' => $this->libelle,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'annee_id'    => $this->annee_id,
 
-            'annee' => new AnneeResource($this->whenLoaded('annee')),
+            // Module column from AvancementProgramme
+            'libelle'     => $this->libelle,
+
+            // Régional column: O / N → true / false
+            'regional'    => $this->regional,
+
+            'created_at'  => $this->created_at,
+            'updated_at'  => $this->updated_at,
+
+            // Relationships (loaded on demand)
+            'annee'        => new AnneeResource($this->whenLoaded('annee')),
             'affectations' => AffectationResource::collection($this->whenLoaded('affectations')),
         ];
     }
 }
-

@@ -8,11 +8,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Seance extends Model
 {
-    protected $fillable = ['affectation_id', 'type', 'date', 'time_range_id'];
+    protected $fillable = ['affectation_id','espace_id', 'type', 'date', 'time_range_id'];
 
     protected $casts = [
         'date' => 'date',
     ];
+
+    public function espace(): BelongsTo
+    {
+        return $this->belongsTo(Espace::class);
+    }
 
     /** @return BelongsTo<Affectation, Seance> */
     public function affectation(): BelongsTo

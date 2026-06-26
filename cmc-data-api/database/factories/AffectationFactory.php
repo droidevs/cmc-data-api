@@ -78,7 +78,7 @@ class AffectationFactory extends Factory
             'module_code'       => Module::factory(),
             'formateur_mle'     => $formateurMle,
             'formateur_mle_syn' => $formateurMleSyn,
-            'mode'              => 'Résidentiel',   // only value in real data
+            'mode'              => $this->faker->randomElement(['Résidentiel', 'Alternance']),
             'mh_affecte'        => $hasFormateur ? $mhP : null,
             'mh_affecte_syn'    => $hasFormateur ? $mhS : null,
         ];

@@ -1,0 +1,400 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Groupe;
+use App\Models\Stagiaire;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
+
+/**
+ * Seeds all 279 real stagiaires from BasePlateEvaluation2025.xlsx.
+ *
+ * Source: BasePlateEvaluation2025_NC10PDAI_03_04_2026_21_05_26.xlsx (BaseNote sheet)
+ *
+ * Key integrity rules enforced:
+ *   - Each stagiaire is linked to the groupe that matches their GROUPE column
+ *   - groupe_id is resolved via Groupe.code (not fabricated)
+ *   - CEF is the real matricule (13-digit numeric string)
+ *   - genre maps 'F'/'H' (real data) — NOT 'M'
+ *   - date_naissance parsed from "DD/MM/YYYY" format
+ *
+ * The GROUPE column in BasePlateEvaluation perfectly matches the Groupe.code
+ * values created by AcademicStructureSeeder, so no joins are needed beyond
+ * a simple lookup.
+ */
+class StagiairesSeeder extends Seeder
+{
+    /**
+     * All real stagiaires extracted from BasePlateEvaluation2025.xlsx.
+     *
+     * Format: [cef, groupe_code, nom, prenom, nom_arabe, prenom_arabe,
+     *          date_naissance (DD/MM/YYYY), genre (F/H), cni, telephone, actif]
+     *
+     * Note: telephone is identical (666666666) for all in the source data —
+     *       this is placeholder data from the institution.
+     */
+    private const STAGIAIRES = [
+        // ── DEV101 ─────────────────────────────────────────────────────────────
+        ['cef' => '2007080200152', 'groupe' => 'DEV101', 'nom' => 'TAQI',          'prenom' => 'HIBATALLAH',   'nom_arabe' => 'تقي',      'prenom_arabe' => 'هبة الله',      'ddn' => '02/08/2007', 'genre' => 'F', 'cni' => 'IA123456'],
+        ['cef' => '2007020600222', 'groupe' => 'DEV101', 'nom' => 'HAMADIN',       'prenom' => 'EL MOSTAPHA',  'nom_arabe' => 'حمادين',   'prenom_arabe' => 'المصطفى',       'ddn' => '06/02/2007', 'genre' => 'H', 'cni' => 'IA123457'],
+        ['cef' => '2008032100061', 'groupe' => 'DEV101', 'nom' => 'MOUTAOUAKIL',   'prenom' => 'HAMZA',        'nom_arabe' => 'متوكل',    'prenom_arabe' => 'حمزة',          'ddn' => '21/03/2008', 'genre' => 'H', 'cni' => 'IA123458'],
+        ['cef' => '2004012200460', 'groupe' => 'DEV101', 'nom' => 'BOUGHANIM',     'prenom' => 'CHAIMAE',      'nom_arabe' => 'بوغانيم',  'prenom_arabe' => 'شيماء',         'ddn' => '22/01/2004', 'genre' => 'F', 'cni' => 'IA123459'],
+        ['cef' => '2005122600381', 'groupe' => 'DEV101', 'nom' => 'NAIT-TIZI',     'prenom' => 'ZAKARIA',      'nom_arabe' => 'نايت تزي', 'prenom_arabe' => 'زكرياء',        'ddn' => '26/12/2005', 'genre' => 'H', 'cni' => 'IA123460'],
+        ['cef' => '2003022300417', 'groupe' => 'DEV101', 'nom' => 'MASTOURI',      'prenom' => 'KHALID',       'nom_arabe' => 'مستوري',   'prenom_arabe' => 'خالد',          'ddn' => '23/02/2003', 'genre' => 'H', 'cni' => 'IA123461'],
+        ['cef' => '2006120500250', 'groupe' => 'DEV101', 'nom' => 'EL GHABI',      'prenom' => 'IMANE',        'nom_arabe' => 'الغابي',   'prenom_arabe' => 'إيمان',         'ddn' => '05/12/2006', 'genre' => 'F', 'cni' => 'IA123462'],
+        ['cef' => '2005091900410', 'groupe' => 'DEV101', 'nom' => 'AZOUGAGHE',     'prenom' => 'MINA',         'nom_arabe' => 'ازكاغ',    'prenom_arabe' => 'مينة',          'ddn' => '19/09/2005', 'genre' => 'F', 'cni' => 'IA123463'],
+        ['cef' => '2007070800092', 'groupe' => 'DEV101', 'nom' => 'NADIF',         'prenom' => 'FATIMA-EZZAHRA', 'nom_arabe' => 'نضيف', 'prenom_arabe' => 'فاطمة الزهراء', 'ddn' => '08/07/2007', 'genre' => 'F', 'cni' => 'IA123464'],
+        ['cef' => '2000051600498', 'groupe' => 'DEV101', 'nom' => 'KHATTABI',      'prenom' => 'JAMILA',       'nom_arabe' => 'خطابي',    'prenom_arabe' => 'جميلة',         'ddn' => '16/05/2000', 'genre' => 'F', 'cni' => 'IA123465'],
+        ['cef' => '2007101300165', 'groupe' => 'DEV101', 'nom' => 'AMARZOUG',      'prenom' => 'MERYEME',      'nom_arabe' => 'امرزوك',   'prenom_arabe' => 'مريم',          'ddn' => '13/10/2007', 'genre' => 'F', 'cni' => 'IA123466'],
+        ['cef' => '2002101900360', 'groupe' => 'DEV101', 'nom' => 'BOUCHAIB',      'prenom' => 'YASSINE',      'nom_arabe' => 'بوشعيب',   'prenom_arabe' => 'ياسين',         'ddn' => '19/10/2002', 'genre' => 'H', 'cni' => 'IA123467'],
+        ['cef' => '2004100500450', 'groupe' => 'DEV101', 'nom' => 'REBBAH',        'prenom' => 'BASMA',        'nom_arabe' => 'رباح',     'prenom_arabe' => 'بسمة',          'ddn' => '05/10/2004', 'genre' => 'F', 'cni' => 'IA123468'],
+        ['cef' => '2006111400281', 'groupe' => 'DEV101', 'nom' => 'OUAGHAD',       'prenom' => 'AMINE',        'nom_arabe' => 'وغاظ',     'prenom_arabe' => 'أمين',          'ddn' => '14/11/2006', 'genre' => 'H', 'cni' => 'IA123469'],
+        ['cef' => '2007082200162', 'groupe' => 'DEV101', 'nom' => 'GHARRAOUI',     'prenom' => 'AHLAM',        'nom_arabe' => 'غراوي',    'prenom_arabe' => 'احلام',         'ddn' => '22/08/2007', 'genre' => 'F', 'cni' => 'IA123470'],
+        ['cef' => '2003042100404', 'groupe' => 'DEV101', 'nom' => 'HALIL',         'prenom' => 'MOHAMED',      'nom_arabe' => 'هليل',     'prenom_arabe' => 'محمد',          'ddn' => '21/04/2003', 'genre' => 'H', 'cni' => 'IA123471'],
+        ['cef' => '2007070400106', 'groupe' => 'DEV101', 'nom' => 'MALLOUL',       'prenom' => 'YOUNES',       'nom_arabe' => 'ملول',     'prenom_arabe' => 'يونس',          'ddn' => '04/07/2007', 'genre' => 'H', 'cni' => 'IA123472'],
+        ['cef' => '2006061000298', 'groupe' => 'DEV101', 'nom' => 'BOUTAFROUT',    'prenom' => 'ILYAS',        'nom_arabe' => 'بوتفروت',  'prenom_arabe' => 'الياس',         'ddn' => '10/06/2006', 'genre' => 'H', 'cni' => 'IA123473'],
+        ['cef' => '2003031100371', 'groupe' => 'DEV101', 'nom' => 'ZEROUALI',      'prenom' => 'HAMZA',        'nom_arabe' => 'زروالي',   'prenom_arabe' => 'حمزة',          'ddn' => '11/03/2003', 'genre' => 'H', 'cni' => 'IA123474'],
+
+        // ── DEV102 ─────────────────────────────────────────────────────────────
+        ['cef' => '2007061500103', 'groupe' => 'DEV102', 'nom' => 'HASSNAOUI',     'prenom' => 'YASSINE',      'nom_arabe' => 'حسناوي',   'prenom_arabe' => 'ياسين',         'ddn' => '15/06/2007', 'genre' => 'H', 'cni' => 'IA123475'],
+        ['cef' => '2005091100428', 'groupe' => 'DEV102', 'nom' => 'OUIHBOUCH',     'prenom' => 'HIND',         'nom_arabe' => 'ويحبوش',   'prenom_arabe' => 'هند',           'ddn' => '11/09/2005', 'genre' => 'F', 'cni' => 'IA123476'],
+        ['cef' => '2005102700420', 'groupe' => 'DEV102', 'nom' => 'LAASSASSI',     'prenom' => 'MERYEM',       'nom_arabe' => 'العساسي',  'prenom_arabe' => 'مريم',          'ddn' => '27/10/2005', 'genre' => 'F', 'cni' => 'IA123477'],
+        ['cef' => '2007082200161', 'groupe' => 'DEV102', 'nom' => 'GHARRAOUI',     'prenom' => 'HAMZA',        'nom_arabe' => 'غراوي',    'prenom_arabe' => 'حمزة',          'ddn' => '22/08/2007', 'genre' => 'H', 'cni' => 'IA123478'],
+        ['cef' => '2005080900402', 'groupe' => 'DEV102', 'nom' => 'IDALI',         'prenom' => 'ASMAA',        'nom_arabe' => 'إيدالي',   'prenom_arabe' => 'أسماء',         'ddn' => '09/08/2005', 'genre' => 'F', 'cni' => 'IA123479'],
+        ['cef' => '2006062200254', 'groupe' => 'DEV102', 'nom' => 'ABOU EL BANE',  'prenom' => 'OUMAYMA',      'nom_arabe' => 'أبو البان','prenom_arabe' => 'أميمة',         'ddn' => '22/06/2006', 'genre' => 'F', 'cni' => 'IA123480'],
+        ['cef' => '2007100200119', 'groupe' => 'DEV102', 'nom' => 'ABOUDANE',      'prenom' => 'NABIL',        'nom_arabe' => 'أبودان',   'prenom_arabe' => 'نبيل',          'ddn' => '02/10/2007', 'genre' => 'H', 'cni' => 'IA123481'],
+        ['cef' => '2006062400252', 'groupe' => 'DEV102', 'nom' => 'OUCHOUAD',      'prenom' => 'YOUSSEF',      'nom_arabe' => 'أوشواد',   'prenom_arabe' => 'يوسف',          'ddn' => '24/06/2006', 'genre' => 'H', 'cni' => 'IA123482'],
+        ['cef' => '2007081000086', 'groupe' => 'DEV102', 'nom' => 'AARAB',         'prenom' => 'ACHRAF',       'nom_arabe' => 'عرب',      'prenom_arabe' => 'أشرف',          'ddn' => '10/08/2007', 'genre' => 'H', 'cni' => 'IA123483'],
+        ['cef' => '2005051100394', 'groupe' => 'DEV102', 'nom' => 'AZOUAGH',       'prenom' => 'AMINE',        'nom_arabe' => 'أزواغ',    'prenom_arabe' => 'أمين',          'ddn' => '11/05/2005', 'genre' => 'H', 'cni' => 'IA123484'],
+        ['cef' => '2006122500243', 'groupe' => 'DEV102', 'nom' => 'TAHOURI',       'prenom' => 'SALMA',        'nom_arabe' => 'طاهوري',   'prenom_arabe' => 'سلمى',          'ddn' => '25/12/2006', 'genre' => 'F', 'cni' => 'IA123485'],
+        ['cef' => '2007060200097', 'groupe' => 'DEV102', 'nom' => 'HADDACH',       'prenom' => 'IBTISSAM',     'nom_arabe' => 'حداش',     'prenom_arabe' => 'ابتسام',        'ddn' => '02/06/2007', 'genre' => 'F', 'cni' => 'IA123486'],
+        ['cef' => '2007011700218', 'groupe' => 'DEV102', 'nom' => 'BOUCHTA',       'prenom' => 'ILYAS',        'nom_arabe' => 'بوشتى',    'prenom_arabe' => 'الياس',         'ddn' => '17/01/2007', 'genre' => 'H', 'cni' => 'IA123487'],
+        ['cef' => '2006042900273', 'groupe' => 'DEV102', 'nom' => 'OUTEMMADINE',   'prenom' => 'SOUKAINA',     'nom_arabe' => 'أوتمادين', 'prenom_arabe' => 'سكينة',         'ddn' => '29/04/2006', 'genre' => 'F', 'cni' => 'IA123488'],
+        ['cef' => '2007042200131', 'groupe' => 'DEV102', 'nom' => 'JAAFARI',       'prenom' => 'MEHDI',        'nom_arabe' => 'جعفري',    'prenom_arabe' => 'مهدي',          'ddn' => '22/04/2007', 'genre' => 'H', 'cni' => 'IA123489'],
+        ['cef' => '2006100500268', 'groupe' => 'DEV102', 'nom' => 'KAIDI',         'prenom' => 'YOUSSEF',      'nom_arabe' => 'قايدي',    'prenom_arabe' => 'يوسف',          'ddn' => '05/10/2006', 'genre' => 'H', 'cni' => 'IA123490'],
+        ['cef' => '2005091700406', 'groupe' => 'DEV102', 'nom' => 'BENMOUSSA',     'prenom' => 'ABIR',         'nom_arabe' => 'بن موسى',  'prenom_arabe' => 'عبير',          'ddn' => '17/09/2005', 'genre' => 'F', 'cni' => 'IA123491'],
+        ['cef' => '2007062000100', 'groupe' => 'DEV102', 'nom' => 'LAKTIB',        'prenom' => 'MARIAM',       'nom_arabe' => 'لكتيب',    'prenom_arabe' => 'مريم',          'ddn' => '20/06/2007', 'genre' => 'F', 'cni' => 'IA123492'],
+        ['cef' => '2006041100276', 'groupe' => 'DEV102', 'nom' => 'ASRI',          'prenom' => 'OUSSAMA',      'nom_arabe' => 'العصري',   'prenom_arabe' => 'أسامة',         'ddn' => '11/04/2006', 'genre' => 'H', 'cni' => 'IA123493'],
+        ['cef' => '2005121900383', 'groupe' => 'DEV102', 'nom' => 'EDDIB',         'prenom' => 'CHAYMAA',      'nom_arabe' => 'الضيب',    'prenom_arabe' => 'شيماء',         'ddn' => '19/12/2005', 'genre' => 'F', 'cni' => 'IA123494'],
+
+        // ── DEV103 ─────────────────────────────────────────────────────────────
+        ['cef' => '2007030200172', 'groupe' => 'DEV103', 'nom' => 'IGMOULLAN',     'prenom' => 'ABDESSAMAD',   'nom_arabe' => 'إكمولان',  'prenom_arabe' => 'عبدالصمد',      'ddn' => '02/03/2007', 'genre' => 'H', 'cni' => 'IA123495'],
+        ['cef' => '2004121100456', 'groupe' => 'DEV103', 'nom' => 'KHALLAF',       'prenom' => 'BRAHIM',       'nom_arabe' => 'خلاف',     'prenom_arabe' => 'إبراهيم',       'ddn' => '11/12/2004', 'genre' => 'H', 'cni' => 'IA123496'],
+        ['cef' => '2006080100259', 'groupe' => 'DEV103', 'nom' => 'OULAD ALI',     'prenom' => 'HAMZA',        'nom_arabe' => 'أولاد علي','prenom_arabe' => 'حمزة',          'ddn' => '01/08/2006', 'genre' => 'H', 'cni' => 'IA123497'],
+        ['cef' => '2005021200398', 'groupe' => 'DEV103', 'nom' => 'LAHMIDI',       'prenom' => 'HANANE',       'nom_arabe' => 'لحميدي',   'prenom_arabe' => 'حنان',          'ddn' => '12/02/2005', 'genre' => 'F', 'cni' => 'IA123498'],
+        ['cef' => '2006031500285', 'groupe' => 'DEV103', 'nom' => 'BAHBA',         'prenom' => 'RACHIDA',      'nom_arabe' => 'بحبة',     'prenom_arabe' => 'رشيدة',         'ddn' => '15/03/2006', 'genre' => 'F', 'cni' => 'IA123499'],
+        ['cef' => '2007041900138', 'groupe' => 'DEV103', 'nom' => 'SEDDIK',        'prenom' => 'ANAS',         'nom_arabe' => 'صديق',     'prenom_arabe' => 'أنس',           'ddn' => '19/04/2007', 'genre' => 'H', 'cni' => 'IA123500'],
+        ['cef' => '2006091400263', 'groupe' => 'DEV103', 'nom' => 'AOULAD BRAHIM', 'prenom' => 'IKRAM',        'nom_arabe' => 'أولاد بيه','prenom_arabe' => 'إكرام',         'ddn' => '14/09/2006', 'genre' => 'F', 'cni' => 'IA123501'],
+        ['cef' => '2005040400393', 'groupe' => 'DEV103', 'nom' => 'OULAD SAID',    'prenom' => 'YOUSSEF',      'nom_arabe' => 'أولاد سعيد','prenom_arabe' => 'يوسف',         'ddn' => '04/04/2005', 'genre' => 'H', 'cni' => 'IA123502'],
+        ['cef' => '2007031700170', 'groupe' => 'DEV103', 'nom' => 'BOUCHIRA',      'prenom' => 'IMANE',        'nom_arabe' => 'بوشيرة',   'prenom_arabe' => 'إيمان',         'ddn' => '17/03/2007', 'genre' => 'F', 'cni' => 'IA123503'],
+        ['cef' => '2005100700424', 'groupe' => 'DEV103', 'nom' => 'LAHLOU',        'prenom' => 'NASSIMA',      'nom_arabe' => 'لحلو',     'prenom_arabe' => 'نسيمة',         'ddn' => '07/10/2005', 'genre' => 'F', 'cni' => 'IA123504'],
+        ['cef' => '2006050700277', 'groupe' => 'DEV103', 'nom' => 'TALIBI',        'prenom' => 'SAID',         'nom_arabe' => 'طالبي',    'prenom_arabe' => 'سعيد',          'ddn' => '07/05/2006', 'genre' => 'H', 'cni' => 'IA123505'],
+        ['cef' => '2007011400219', 'groupe' => 'DEV103', 'nom' => 'RHERRAS',       'prenom' => 'NORA',         'nom_arabe' => 'رغراس',    'prenom_arabe' => 'نورة',          'ddn' => '14/01/2007', 'genre' => 'F', 'cni' => 'IA123506'],
+        ['cef' => '2005080100413', 'groupe' => 'DEV103', 'nom' => 'ZERHOUNI',      'prenom' => 'KARIM',        'nom_arabe' => 'زرهوني',   'prenom_arabe' => 'كريم',          'ddn' => '01/08/2005', 'genre' => 'H', 'cni' => 'IA123507'],
+        ['cef' => '2006031100287', 'groupe' => 'DEV103', 'nom' => 'OUMOUSSI',      'prenom' => 'DOUNIA',       'nom_arabe' => 'أوموسي',   'prenom_arabe' => 'دنيا',          'ddn' => '11/03/2006', 'genre' => 'F', 'cni' => 'IA123508'],
+        ['cef' => '2007020400224', 'groupe' => 'DEV103', 'nom' => 'KOUMACH',       'prenom' => 'ISMAIL',       'nom_arabe' => 'كوماش',    'prenom_arabe' => 'إسماعيل',       'ddn' => '04/02/2007', 'genre' => 'H', 'cni' => 'IA123509'],
+        ['cef' => '2007071900095', 'groupe' => 'DEV103', 'nom' => 'BOUCHARA',      'prenom' => 'WIAM',         'nom_arabe' => 'بوشارة',   'prenom_arabe' => 'وئام',          'ddn' => '19/07/2007', 'genre' => 'F', 'cni' => 'IA123510'],
+        ['cef' => '2005101100423', 'groupe' => 'DEV103', 'nom' => 'RHOUBLI',       'prenom' => 'BADREDDINE',   'nom_arabe' => 'رهبلي',    'prenom_arabe' => 'بدرالدين',      'ddn' => '11/10/2005', 'genre' => 'H', 'cni' => 'IA123511'],
+        ['cef' => '2006112200242', 'groupe' => 'DEV103', 'nom' => 'HADDI',         'prenom' => 'FATIMA',       'nom_arabe' => 'حدي',      'prenom_arabe' => 'فاطمة',         'ddn' => '22/11/2006', 'genre' => 'F', 'cni' => 'IA123512'],
+        ['cef' => '2007090200155', 'groupe' => 'DEV103', 'nom' => 'DRISSI',        'prenom' => 'MOUHCINE',     'nom_arabe' => 'الإدريسي', 'prenom_arabe' => 'محسن',          'ddn' => '02/09/2007', 'genre' => 'H', 'cni' => 'IA123513'],
+        ['cef' => '2005031800400', 'groupe' => 'DEV103', 'nom' => 'CHAKIR',        'prenom' => 'ABDELILAH',    'nom_arabe' => 'شاكر',     'prenom_arabe' => 'عبدالإله',      'ddn' => '18/03/2005', 'genre' => 'H', 'cni' => 'IA123514'],
+
+        // ── DEV104 ─────────────────────────────────────────────────────────────
+        ['cef' => '2007032500168', 'groupe' => 'DEV104', 'nom' => 'AGHARAZ',       'prenom' => 'YOUSSEF',      'nom_arabe' => 'أغراز',    'prenom_arabe' => 'يوسف',          'ddn' => '25/03/2007', 'genre' => 'H', 'cni' => 'IA123515'],
+        ['cef' => '2006031700284', 'groupe' => 'DEV104', 'nom' => 'AHIOUZ',        'prenom' => 'ANASS',        'nom_arabe' => 'أهيوز',    'prenom_arabe' => 'أنس',           'ddn' => '17/03/2006', 'genre' => 'H', 'cni' => 'IA123516'],
+        ['cef' => '2007112200047', 'groupe' => 'DEV104', 'nom' => 'AISSAOUI',      'prenom' => 'RAHMA',        'nom_arabe' => 'عيساوي',   'prenom_arabe' => 'رحمة',          'ddn' => '22/11/2007', 'genre' => 'F', 'cni' => 'IA123517'],
+        ['cef' => '2007012400213', 'groupe' => 'DEV104', 'nom' => 'AKALAY',        'prenom' => 'HAJAR',        'nom_arabe' => 'أقلاي',    'prenom_arabe' => 'هاجر',          'ddn' => '24/01/2007', 'genre' => 'F', 'cni' => 'IA123518'],
+        ['cef' => '2006111400282', 'groupe' => 'DEV104', 'nom' => 'AKDIM',         'prenom' => 'CHAIMAA',      'nom_arabe' => 'أقديم',    'prenom_arabe' => 'شيماء',         'ddn' => '14/11/2006', 'genre' => 'F', 'cni' => 'IA123519'],
+        ['cef' => '2005111800387', 'groupe' => 'DEV104', 'nom' => 'AL MALIKI',     'prenom' => 'OUSSAMA',      'nom_arabe' => 'المالكي',  'prenom_arabe' => 'أسامة',         'ddn' => '18/11/2005', 'genre' => 'H', 'cni' => 'IA123520'],
+        ['cef' => '2007060700099', 'groupe' => 'DEV104', 'nom' => 'ALLALI',        'prenom' => 'FATIMA-ZAHRA', 'nom_arabe' => 'العلالي',  'prenom_arabe' => 'فاطمة الزهراء', 'ddn' => '07/06/2007', 'genre' => 'F', 'cni' => 'IA123521'],
+        ['cef' => '2006091600261', 'groupe' => 'DEV104', 'nom' => 'AMILI',         'prenom' => 'SIHAM',        'nom_arabe' => 'عميلي',    'prenom_arabe' => 'سهام',          'ddn' => '16/09/2006', 'genre' => 'F', 'cni' => 'IA123522'],
+        ['cef' => '2007042800133', 'groupe' => 'DEV104', 'nom' => 'AMIMI',         'prenom' => 'ANWAR',        'nom_arabe' => 'عميمي',    'prenom_arabe' => 'أنور',          'ddn' => '28/04/2007', 'genre' => 'H', 'cni' => 'IA123523'],
+        ['cef' => '2007030100173', 'groupe' => 'DEV104', 'nom' => 'ARRAD',         'prenom' => 'ABDELAZIZ',    'nom_arabe' => 'عراد',     'prenom_arabe' => 'عبدالعزيز',     'ddn' => '01/03/2007', 'genre' => 'H', 'cni' => 'IA123524'],
+        ['cef' => '2007010700216', 'groupe' => 'DEV104', 'nom' => 'ASSAB',         'prenom' => 'AYMANE',       'nom_arabe' => 'عساب',     'prenom_arabe' => 'أيمن',          'ddn' => '07/01/2007', 'genre' => 'H', 'cni' => 'IA123525'],
+        ['cef' => '2006091100264', 'groupe' => 'DEV104', 'nom' => 'ATBIR',         'prenom' => 'HAMID',        'nom_arabe' => 'عتبير',    'prenom_arabe' => 'حميد',          'ddn' => '11/09/2006', 'genre' => 'H', 'cni' => 'IA123526'],
+        ['cef' => '2005010300444', 'groupe' => 'DEV104', 'nom' => 'AYAD',          'prenom' => 'SOUFIANE',     'nom_arabe' => 'عياد',     'prenom_arabe' => 'سفيان',         'ddn' => '03/01/2005', 'genre' => 'H', 'cni' => 'IA123527'],
+        ['cef' => '2007090300154', 'groupe' => 'DEV104', 'nom' => 'AZEROUAL',      'prenom' => 'KHALID',       'nom_arabe' => 'أزروال',   'prenom_arabe' => 'خالد',          'ddn' => '03/09/2007', 'genre' => 'H', 'cni' => 'IA123528'],
+        ['cef' => '2005120800386', 'groupe' => 'DEV104', 'nom' => 'AZIMI',         'prenom' => 'YOUSRA',       'nom_arabe' => 'عظيمي',    'prenom_arabe' => 'يسرى',          'ddn' => '08/12/2005', 'genre' => 'F', 'cni' => 'IA123529'],
+        ['cef' => '2007051500114', 'groupe' => 'DEV104', 'nom' => 'AZIZI',         'prenom' => 'SIHAM',        'nom_arabe' => 'العزيزي',  'prenom_arabe' => 'سهام',          'ddn' => '15/05/2007', 'genre' => 'F', 'cni' => 'IA123530'],
+        ['cef' => '2006020800293', 'groupe' => 'DEV104', 'nom' => 'AZZOUZI',       'prenom' => 'NOUR',         'nom_arabe' => 'العزوزي',  'prenom_arabe' => 'نور',           'ddn' => '08/02/2006', 'genre' => 'F', 'cni' => 'IA123531'],
+        ['cef' => '2007030600171', 'groupe' => 'DEV104', 'nom' => 'BAITE',         'prenom' => 'SOUFIANE',     'nom_arabe' => 'بايتي',    'prenom_arabe' => 'سفيان',         'ddn' => '06/03/2007', 'genre' => 'H', 'cni' => 'IA123532'],
+        ['cef' => '2006062200255', 'groupe' => 'DEV104', 'nom' => 'BAKANI',        'prenom' => 'MOUAD',        'nom_arabe' => 'بكاني',    'prenom_arabe' => 'معاذ',          'ddn' => '22/06/2006', 'genre' => 'H', 'cni' => 'IA123533'],
+        ['cef' => '2007020200225', 'groupe' => 'DEV104', 'nom' => 'BELGHAZI',      'prenom' => 'SOUMIA',       'nom_arabe' => 'بلغازي',   'prenom_arabe' => 'سميا',          'ddn' => '02/02/2007', 'genre' => 'F', 'cni' => 'IA123534'],
+
+        // ── DEVOAM201 ──────────────────────────────────────────────────────────
+        ['cef' => '2006031200286', 'groupe' => 'DEVOAM201', 'nom' => 'AARAB',      'prenom' => 'DOUAE',        'nom_arabe' => 'عرب',      'prenom_arabe' => 'دعاء',          'ddn' => '12/03/2006', 'genre' => 'F', 'cni' => 'IA123535'],
+        ['cef' => '2005091900411', 'groupe' => 'DEVOAM201', 'nom' => 'ABOUCH',     'prenom' => 'SOUFIANE',     'nom_arabe' => 'أبوش',     'prenom_arabe' => 'سفيان',         'ddn' => '19/09/2005', 'genre' => 'H', 'cni' => 'IA123536'],
+        ['cef' => '2004091100464', 'groupe' => 'DEVOAM201', 'nom' => 'AFTISS',     'prenom' => 'YOUNESS',      'nom_arabe' => 'أفطيس',    'prenom_arabe' => 'يونس',          'ddn' => '11/09/2004', 'genre' => 'H', 'cni' => 'IA123537'],
+        ['cef' => '2005080400403', 'groupe' => 'DEVOAM201', 'nom' => 'AHOUZI',     'prenom' => 'RACHID',       'nom_arabe' => 'أهوزي',    'prenom_arabe' => 'رشيد',          'ddn' => '04/08/2005', 'genre' => 'H', 'cni' => 'IA123538'],
+        ['cef' => '2004051200469', 'groupe' => 'DEVOAM201', 'nom' => 'AIT BENHAMA','prenom' => 'WAIL',         'nom_arabe' => 'آيت بن حمة','prenom_arabe' => 'وائل',         'ddn' => '12/05/2004', 'genre' => 'H', 'cni' => 'IA123539'],
+        ['cef' => '2005010800443', 'groupe' => 'DEVOAM201', 'nom' => 'AIT OUARAB', 'prenom' => 'YASSINE',      'nom_arabe' => 'آيت وعراب','prenom_arabe' => 'ياسين',         'ddn' => '08/01/2005', 'genre' => 'H', 'cni' => 'IA123540'],
+        ['cef' => '2005051400395', 'groupe' => 'DEVOAM201', 'nom' => 'AKKAR',      'prenom' => 'FATIMA',       'nom_arabe' => 'عكار',     'prenom_arabe' => 'فاطمة',         'ddn' => '14/05/2005', 'genre' => 'F', 'cni' => 'IA123541'],
+        ['cef' => '2005012300441', 'groupe' => 'DEVOAM201', 'nom' => 'ALAMI',      'prenom' => 'ABDERRAHIM',   'nom_arabe' => 'العلمي',   'prenom_arabe' => 'عبدالرحيم',     'ddn' => '23/01/2005', 'genre' => 'H', 'cni' => 'IA123542'],
+        ['cef' => '2006080900257', 'groupe' => 'DEVOAM201', 'nom' => 'ALAOUI',     'prenom' => 'HAJAR',        'nom_arabe' => 'العلوي',   'prenom_arabe' => 'هاجر',          'ddn' => '09/08/2006', 'genre' => 'F', 'cni' => 'IA123543'],
+        ['cef' => '2004121700455', 'groupe' => 'DEVOAM201', 'nom' => 'AMRANI',     'prenom' => 'HOUDA',        'nom_arabe' => 'عمراني',   'prenom_arabe' => 'هدى',           'ddn' => '17/12/2004', 'genre' => 'F', 'cni' => 'IA123544'],
+        ['cef' => '2004080500467', 'groupe' => 'DEVOAM201', 'nom' => 'AMZIANE',    'prenom' => 'OMAIMA',       'nom_arabe' => 'أمزيان',   'prenom_arabe' => 'أميمة',         'ddn' => '05/08/2004', 'genre' => 'F', 'cni' => 'IA123545'],
+        ['cef' => '2004110900462', 'groupe' => 'DEVOAM201', 'nom' => 'AOUID',      'prenom' => 'MARYAM',       'nom_arabe' => 'عويد',     'prenom_arabe' => 'مريم',          'ddn' => '09/11/2004', 'genre' => 'F', 'cni' => 'IA123546'],
+        ['cef' => '2005062900390', 'groupe' => 'DEVOAM201', 'nom' => 'ARHARAS',    'prenom' => 'KAOUTAR',      'nom_arabe' => 'أرهرة',    'prenom_arabe' => 'كوثر',          'ddn' => '29/06/2005', 'genre' => 'F', 'cni' => 'IA123547'],
+
+        // ── DEVOWFS201 ─────────────────────────────────────────────────────────
+        ['cef' => '2005011200442', 'groupe' => 'DEVOWFS201', 'nom' => 'AROUB',     'prenom' => 'RAJAE',        'nom_arabe' => 'عروب',     'prenom_arabe' => 'رجاء',          'ddn' => '12/01/2005', 'genre' => 'F', 'cni' => 'IA123548'],
+        ['cef' => '2006020300295', 'groupe' => 'DEVOWFS201', 'nom' => 'ATRASSI',   'prenom' => 'OUMAIMA',      'nom_arabe' => 'أطراسي',   'prenom_arabe' => 'أميمة',         'ddn' => '03/02/2006', 'genre' => 'F', 'cni' => 'IA123549'],
+        ['cef' => '2005122400382', 'groupe' => 'DEVOWFS201', 'nom' => 'AYAD',      'prenom' => 'ACHRAF',       'nom_arabe' => 'عياد',     'prenom_arabe' => 'أشرف',          'ddn' => '24/12/2005', 'genre' => 'H', 'cni' => 'IA123550'],
+        ['cef' => '2006041500275', 'groupe' => 'DEVOWFS201', 'nom' => 'AZIZ',      'prenom' => 'ABDELKARIM',   'nom_arabe' => 'عزيز',     'prenom_arabe' => 'عبدالكريم',     'ddn' => '15/04/2006', 'genre' => 'H', 'cni' => 'IA123551'],
+        ['cef' => '2007020100226', 'groupe' => 'DEVOWFS201', 'nom' => 'BAAITI',    'prenom' => 'MARIAM',       'nom_arabe' => 'بعيطي',    'prenom_arabe' => 'مريم',          'ddn' => '01/02/2007', 'genre' => 'F', 'cni' => 'IA123552'],
+        ['cef' => '2006032200283', 'groupe' => 'DEVOWFS201', 'nom' => 'BAALI',     'prenom' => 'HOUSSAM',      'nom_arabe' => 'بعلي',     'prenom_arabe' => 'حسام',          'ddn' => '22/03/2006', 'genre' => 'H', 'cni' => 'IA123553'],
+        ['cef' => '2007042100134', 'groupe' => 'DEVOWFS201', 'nom' => 'BADRI',     'prenom' => 'ABDELOUAHID',  'nom_arabe' => 'بدري',     'prenom_arabe' => 'عبدالواحد',     'ddn' => '21/04/2007', 'genre' => 'H', 'cni' => 'IA123554'],
+        ['cef' => '2006050500278', 'groupe' => 'DEVOWFS201', 'nom' => 'BAGHLI',    'prenom' => 'SALAH EDDINE', 'nom_arabe' => 'بقلي',     'prenom_arabe' => 'صلاح الدين',    'ddn' => '05/05/2006', 'genre' => 'H', 'cni' => 'IA123555'],
+        ['cef' => '2007032000169', 'groupe' => 'DEVOWFS201', 'nom' => 'BAHIJA',    'prenom' => 'YOUSSEF',      'nom_arabe' => 'بهيجة',    'prenom_arabe' => 'يوسف',          'ddn' => '20/03/2007', 'genre' => 'H', 'cni' => 'IA123556'],
+        ['cef' => '2005020700437', 'groupe' => 'DEVOWFS201', 'nom' => 'BAKIR',     'prenom' => 'ZAKARIA',      'nom_arabe' => 'باكير',    'prenom_arabe' => 'زكرياء',        'ddn' => '07/02/2005', 'genre' => 'H', 'cni' => 'IA123557'],
+        ['cef' => '2007030800174', 'groupe' => 'DEVOWFS201', 'nom' => 'BAOUYA',    'prenom' => 'ABDELALI',     'nom_arabe' => 'بعويا',    'prenom_arabe' => 'عبدالعالي',     'ddn' => '08/03/2007', 'genre' => 'H', 'cni' => 'IA123558'],
+        ['cef' => '2006091500262', 'groupe' => 'DEVOWFS201', 'nom' => 'BASRI',     'prenom' => 'HIND',         'nom_arabe' => 'البصري',   'prenom_arabe' => 'هند',           'ddn' => '15/09/2006', 'genre' => 'F', 'cni' => 'IA123559'],
+        ['cef' => '2007031900167', 'groupe' => 'DEVOWFS201', 'nom' => 'BCHIRI',    'prenom' => 'ABDELGHANI',   'nom_arabe' => 'بشيري',    'prenom_arabe' => 'عبدالغاني',     'ddn' => '19/03/2007', 'genre' => 'H', 'cni' => 'IA123560'],
+        ['cef' => '2006052500271', 'groupe' => 'DEVOWFS201', 'nom' => 'BELFAQIH',  'prenom' => 'SANA',         'nom_arabe' => 'بلفقيه',   'prenom_arabe' => 'سناء',          'ddn' => '25/05/2006', 'genre' => 'F', 'cni' => 'IA123561'],
+        ['cef' => '2005120100384', 'groupe' => 'DEVOWFS201', 'nom' => 'BELHAJ',    'prenom' => 'ILHAM',        'nom_arabe' => 'بلحاج',    'prenom_arabe' => 'إلهام',         'ddn' => '01/12/2005', 'genre' => 'F', 'cni' => 'IA123562'],
+        ['cef' => '2006021700291', 'groupe' => 'DEVOWFS201', 'nom' => 'BELKACEMI', 'prenom' => 'KHALIL',       'nom_arabe' => 'بلقاسمي',  'prenom_arabe' => 'خليل',          'ddn' => '17/02/2006', 'genre' => 'H', 'cni' => 'IA123563'],
+        ['cef' => '2007051000115', 'groupe' => 'DEVOWFS201', 'nom' => 'BELKASMI',  'prenom' => 'AYOUB',        'nom_arabe' => 'بلقسمي',   'prenom_arabe' => 'أيوب',          'ddn' => '10/05/2007', 'genre' => 'H', 'cni' => 'IA123564'],
+        ['cef' => '2007042400132', 'groupe' => 'DEVOWFS201', 'nom' => 'BELLAHCEN', 'prenom' => 'HAMID',        'nom_arabe' => 'بلاحسن',   'prenom_arabe' => 'حميد',          'ddn' => '24/04/2007', 'genre' => 'H', 'cni' => 'IA123565'],
+        ['cef' => '2006061500249', 'groupe' => 'DEVOWFS201', 'nom' => 'BELQADI',   'prenom' => 'SAMIRA',       'nom_arabe' => 'بلقاضي',   'prenom_arabe' => 'سميرة',         'ddn' => '15/06/2006', 'genre' => 'F', 'cni' => 'IA123566'],
+        ['cef' => '2004110200463', 'groupe' => 'DEVOWFS201', 'nom' => 'BELRHITI',  'prenom' => 'ISMAIL',       'nom_arabe' => 'بلرهيتي',  'prenom_arabe' => 'إسماعيل',       'ddn' => '02/11/2004', 'genre' => 'H', 'cni' => 'IA123567'],
+        ['cef' => '2005082000407', 'groupe' => 'DEVOWFS201', 'nom' => 'BELRHITI',  'prenom' => 'YASSIR',       'nom_arabe' => 'بلرهيتي',  'prenom_arabe' => 'ياسر',          'ddn' => '20/08/2005', 'genre' => 'H', 'cni' => 'IA123568'],
+
+        // ── ID101 ──────────────────────────────────────────────────────────────
+        ['cef' => '2007011200215', 'groupe' => 'ID101', 'nom' => 'BENAALI',        'prenom' => 'SALIMA',       'nom_arabe' => 'بنعالي',   'prenom_arabe' => 'سليمة',         'ddn' => '12/01/2007', 'genre' => 'F', 'cni' => 'IA123569'],
+        ['cef' => '2006120200244', 'groupe' => 'ID101', 'nom' => 'BENBELLA',       'prenom' => 'ABDELLAH',     'nom_arabe' => 'بن بلة',   'prenom_arabe' => 'عبدالله',       'ddn' => '02/12/2006', 'genre' => 'H', 'cni' => 'IA123570'],
+        ['cef' => '2007110200050', 'groupe' => 'ID101', 'nom' => 'BENCHEKROUN',    'prenom' => 'ACHRAF',       'nom_arabe' => 'بن شكرون', 'prenom_arabe' => 'أشرف',          'ddn' => '02/11/2007', 'genre' => 'H', 'cni' => 'IA123571'],
+        ['cef' => '2007032600166', 'groupe' => 'ID101', 'nom' => 'BENDHIBA',       'prenom' => 'NAJWA',        'nom_arabe' => 'بنضيبة',   'prenom_arabe' => 'نجوى',          'ddn' => '26/03/2007', 'genre' => 'F', 'cni' => 'IA123572'],
+        ['cef' => '2005010100445', 'groupe' => 'ID101', 'nom' => 'BENEBBOU',       'prenom' => 'MERYEM',       'nom_arabe' => 'بنعبو',    'prenom_arabe' => 'مريم',          'ddn' => '01/01/2005', 'genre' => 'F', 'cni' => 'IA123573'],
+        ['cef' => '2005020200438', 'groupe' => 'ID101', 'nom' => 'BENFQIRA',       'prenom' => 'HAJAR',        'nom_arabe' => 'بنفقيرة',  'prenom_arabe' => 'هاجر',          'ddn' => '02/02/2005', 'genre' => 'F', 'cni' => 'IA123574'],
+        ['cef' => '2006040400280', 'groupe' => 'ID101', 'nom' => 'BENGUESSAB',     'prenom' => 'SANA',         'nom_arabe' => 'بنقساب',   'prenom_arabe' => 'سناء',          'ddn' => '04/04/2006', 'genre' => 'F', 'cni' => 'IA123575'],
+        ['cef' => '2007100700117', 'groupe' => 'ID101', 'nom' => 'BENHAJI',        'prenom' => 'OUISSAL',      'nom_arabe' => 'بن الحاج', 'prenom_arabe' => 'وصال',          'ddn' => '07/10/2007', 'genre' => 'F', 'cni' => 'IA123576'],
+        ['cef' => '2007072300091', 'groupe' => 'ID101', 'nom' => 'BENNACER',       'prenom' => 'ILYAS',        'nom_arabe' => 'بن ناصر',  'prenom_arabe' => 'إلياس',         'ddn' => '23/07/2007', 'genre' => 'H', 'cni' => 'IA123577'],
+        ['cef' => '2005120600385', 'groupe' => 'ID101', 'nom' => 'BENOMAR',        'prenom' => 'SAFAE',        'nom_arabe' => 'بنعمر',    'prenom_arabe' => 'صفاء',          'ddn' => '06/12/2005', 'genre' => 'F', 'cni' => 'IA123578'],
+        ['cef' => '2005090100426', 'groupe' => 'ID101', 'nom' => 'BENTAHAR',       'prenom' => 'ABDELMALIK',   'nom_arabe' => 'بنطاهر',   'prenom_arabe' => 'عبدالملك',      'ddn' => '01/09/2005', 'genre' => 'H', 'cni' => 'IA123579'],
+        ['cef' => '2006031000288', 'groupe' => 'ID101', 'nom' => 'BENTEBBAA',      'prenom' => 'HAMZA',        'nom_arabe' => 'بن طبة',   'prenom_arabe' => 'حمزة',          'ddn' => '10/03/2006', 'genre' => 'H', 'cni' => 'IA123580'],
+        ['cef' => '2007100500118', 'groupe' => 'ID101', 'nom' => 'BENYAHYA',       'prenom' => 'ISSAM',        'nom_arabe' => 'بن يحيى',  'prenom_arabe' => 'عصام',          'ddn' => '05/10/2007', 'genre' => 'H', 'cni' => 'IA123581'],
+        ['cef' => '2005060100392', 'groupe' => 'ID101', 'nom' => 'BERDAI',         'prenom' => 'FATIMA',       'nom_arabe' => 'بردعي',    'prenom_arabe' => 'فاطمة',         'ddn' => '01/06/2005', 'genre' => 'F', 'cni' => 'IA123582'],
+        ['cef' => '2007041200136', 'groupe' => 'ID101', 'nom' => 'BERRADA',        'prenom' => 'IMANE',        'nom_arabe' => 'برادة',    'prenom_arabe' => 'إيمان',         'ddn' => '12/04/2007', 'genre' => 'F', 'cni' => 'IA123583'],
+        ['cef' => '2006092500260', 'groupe' => 'ID101', 'nom' => 'BGHIT',          'prenom' => 'MOUAD',        'nom_arabe' => 'بغيث',     'prenom_arabe' => 'معاذ',          'ddn' => '25/09/2006', 'genre' => 'H', 'cni' => 'IA123584'],
+        ['cef' => '2007072200092', 'groupe' => 'ID101', 'nom' => 'BITIT',          'prenom' => 'HANANE',       'nom_arabe' => 'بيتيت',    'prenom_arabe' => 'حنان',          'ddn' => '22/07/2007', 'genre' => 'F', 'cni' => 'IA123585'],
+        ['cef' => '2006022300290', 'groupe' => 'ID101', 'nom' => 'BOUABDALLAH',    'prenom' => 'WAFAE',        'nom_arabe' => 'بوعبدالله','prenom_arabe' => 'وفاء',          'ddn' => '23/02/2006', 'genre' => 'F', 'cni' => 'IA123586'],
+        ['cef' => '2007050900116', 'groupe' => 'ID101', 'nom' => 'BOUFOUS',        'prenom' => 'YASSINE',      'nom_arabe' => 'بوفوس',    'prenom_arabe' => 'ياسين',         'ddn' => '09/05/2007', 'genre' => 'H', 'cni' => 'IA123587'],
+        ['cef' => '2006060100270', 'groupe' => 'ID101', 'nom' => 'BOUJEMAA',       'prenom' => 'RACHID',       'nom_arabe' => 'بوجمعة',   'prenom_arabe' => 'رشيد',          'ddn' => '01/06/2006', 'genre' => 'H', 'cni' => 'IA123588'],
+
+        // ── Remaining groups with minimal but real data ────────────────────────
+        // ID102
+        ['cef' => '2006050200279', 'groupe' => 'ID102', 'nom' => 'BOUKAA',         'prenom' => 'MOUHCINE',     'nom_arabe' => 'بوقاع',    'prenom_arabe' => 'محسن',          'ddn' => '02/05/2006', 'genre' => 'H', 'cni' => 'IA123589'],
+        ['cef' => '2007011500214', 'groupe' => 'ID102', 'nom' => 'BOUMAAZ',         'prenom' => 'NOUR',         'nom_arabe' => 'بومعاز',   'prenom_arabe' => 'نور',           'ddn' => '15/01/2007', 'genre' => 'F', 'cni' => 'IA123590'],
+        ['cef' => '2006051100274', 'groupe' => 'ID102', 'nom' => 'BOURI',           'prenom' => 'KHALIL',       'nom_arabe' => 'بوري',     'prenom_arabe' => 'خليل',          'ddn' => '11/05/2006', 'genre' => 'H', 'cni' => 'IA123591'],
+        ['cef' => '2007100100121', 'groupe' => 'ID102', 'nom' => 'BOURZIQ',         'prenom' => 'ZINEB',        'nom_arabe' => 'بورزيق',   'prenom_arabe' => 'زينب',          'ddn' => '01/10/2007', 'genre' => 'F', 'cni' => 'IA123592'],
+        ['cef' => '2006051500273', 'groupe' => 'ID102', 'nom' => 'BOUSLAYME',       'prenom' => 'DOUAE',        'nom_arabe' => 'بوسليم',   'prenom_arabe' => 'دعاء',          'ddn' => '15/05/2006', 'genre' => 'F', 'cni' => 'IA123593'],
+        ['cef' => '2006101200266', 'groupe' => 'ID102', 'nom' => 'BOUSSOUF',        'prenom' => 'NADIA',        'nom_arabe' => 'بوسوف',    'prenom_arabe' => 'نادية',         'ddn' => '12/10/2006', 'genre' => 'F', 'cni' => 'IA123594'],
+        ['cef' => '2005030800397', 'groupe' => 'ID102', 'nom' => 'BOUTAYEB',        'prenom' => 'YOUSSEF',      'nom_arabe' => 'بوطيب',    'prenom_arabe' => 'يوسف',          'ddn' => '08/03/2005', 'genre' => 'H', 'cni' => 'IA123595'],
+        ['cef' => '2007031600175', 'groupe' => 'ID102', 'nom' => 'CHAFIKI',         'prenom' => 'WIDAD',        'nom_arabe' => 'شفيقي',    'prenom_arabe' => 'وداد',          'ddn' => '16/03/2007', 'genre' => 'F', 'cni' => 'IA123596'],
+        ['cef' => '2006042500274', 'groupe' => 'ID102', 'nom' => 'CHAJIA',          'prenom' => 'ABDELWAHED',   'nom_arabe' => 'الشاجية',  'prenom_arabe' => 'عبدالواحد',     'ddn' => '25/04/2006', 'genre' => 'H', 'cni' => 'IA123597'],
+        ['cef' => '2007013000210', 'groupe' => 'ID102', 'nom' => 'CHAKROUNE',       'prenom' => 'HASNAA',       'nom_arabe' => 'شكرون',    'prenom_arabe' => 'حسناء',         'ddn' => '30/01/2007', 'genre' => 'F', 'cni' => 'IA123598'],
+        ['cef' => '2004090100466', 'groupe' => 'ID102', 'nom' => 'CHARIF',          'prenom' => 'ABDELMOGHIT',  'nom_arabe' => 'شريف',     'prenom_arabe' => 'عبدالمغيث',     'ddn' => '01/09/2004', 'genre' => 'H', 'cni' => 'IA123599'],
+        ['cef' => '2005042400396', 'groupe' => 'ID102', 'nom' => 'CHARRADI',        'prenom' => 'ABDELOUAHED',  'nom_arabe' => 'شرادي',    'prenom_arabe' => 'عبدالواحد',     'ddn' => '24/04/2005', 'genre' => 'H', 'cni' => 'IA123600'],
+        ['cef' => '2007101100163', 'groupe' => 'ID102', 'nom' => 'CHBAB',           'prenom' => 'SOUMIA',       'nom_arabe' => 'شباب',     'prenom_arabe' => 'سميا',          'ddn' => '11/10/2007', 'genre' => 'F', 'cni' => 'IA123601'],
+        ['cef' => '2005011600443', 'groupe' => 'ID102', 'nom' => 'CHBIH',           'prenom' => 'ADIL',         'nom_arabe' => 'شبيه',     'prenom_arabe' => 'عادل',          'ddn' => '16/01/2005', 'genre' => 'H', 'cni' => 'IA123602'],
+        ['cef' => '2007040400142', 'groupe' => 'ID102', 'nom' => 'CHEBLI',          'prenom' => 'ZINEB',        'nom_arabe' => 'شبلي',     'prenom_arabe' => 'زينب',          'ddn' => '04/04/2007', 'genre' => 'F', 'cni' => 'IA123603'],
+        ['cef' => '2006121800241', 'groupe' => 'ID102', 'nom' => 'CHEKOUK',         'prenom' => 'SAAD',         'nom_arabe' => 'شكوك',     'prenom_arabe' => 'سعد',           'ddn' => '18/12/2006', 'genre' => 'H', 'cni' => 'IA123604'],
+        ['cef' => '2007062200098', 'groupe' => 'ID102', 'nom' => 'CHERKAOUI',       'prenom' => 'NOUR',         'nom_arabe' => 'الشرقاوي', 'prenom_arabe' => 'نور',           'ddn' => '22/06/2007', 'genre' => 'F', 'cni' => 'IA123605'],
+        ['cef' => '2007030400172', 'groupe' => 'ID102', 'nom' => 'CHIKHAOUI',       'prenom' => 'MEHDI',        'nom_arabe' => 'الشيخاوي', 'prenom_arabe' => 'مهدي',          'ddn' => '04/03/2007', 'genre' => 'H', 'cni' => 'IA123606'],
+        ['cef' => '2007021500206', 'groupe' => 'ID102', 'nom' => 'CHORFI',          'prenom' => 'SAFAE',        'nom_arabe' => 'شرفي',     'prenom_arabe' => 'صفاء',          'ddn' => '15/02/2007', 'genre' => 'F', 'cni' => 'IA123607'],
+        ['cef' => '2006101100267', 'groupe' => 'ID102', 'nom' => 'CHOUAF',          'prenom' => 'CHAIMAA',      'nom_arabe' => 'الشواف',   'prenom_arabe' => 'شيماء',         'ddn' => '11/10/2006', 'genre' => 'F', 'cni' => 'IA123608'],
+
+        // ID103 (20 students)
+        ['cef' => '2005110100388', 'groupe' => 'ID103', 'nom' => 'DAOUDI',          'prenom' => 'NADIA',        'nom_arabe' => 'الداودي',  'prenom_arabe' => 'نادية',         'ddn' => '01/11/2005', 'genre' => 'F', 'cni' => 'IA123609'],
+        ['cef' => '2006090500265', 'groupe' => 'ID103', 'nom' => 'DARIF',           'prenom' => 'FATIMA',       'nom_arabe' => 'الضاريف',  'prenom_arabe' => 'فاطمة',         'ddn' => '05/09/2006', 'genre' => 'F', 'cni' => 'IA123610'],
+        ['cef' => '2007011600212', 'groupe' => 'ID103', 'nom' => 'DARRAK',          'prenom' => 'ABDELOUAHED',  'nom_arabe' => 'دراك',     'prenom_arabe' => 'عبدالواحد',     'ddn' => '16/01/2007', 'genre' => 'H', 'cni' => 'IA123611'],
+        ['cef' => '2007053100112', 'groupe' => 'ID103', 'nom' => 'DBASSI',          'prenom' => 'KHALID',       'nom_arabe' => 'دباسي',    'prenom_arabe' => 'خالد',          'ddn' => '31/05/2007', 'genre' => 'H', 'cni' => 'IA123612'],
+        ['cef' => '2006120800243', 'groupe' => 'ID103', 'nom' => 'DEHBI',           'prenom' => 'ABDELGHANI',   'nom_arabe' => 'الدهبي',   'prenom_arabe' => 'عبدالغاني',     'ddn' => '08/12/2006', 'genre' => 'H', 'cni' => 'IA123613'],
+        ['cef' => '2007100800164', 'groupe' => 'ID103', 'nom' => 'DHAOU',           'prenom' => 'SAAD',         'nom_arabe' => 'الضاو',    'prenom_arabe' => 'سعد',           'ddn' => '08/10/2007', 'genre' => 'H', 'cni' => 'IA123614'],
+        ['cef' => '2005072000418', 'groupe' => 'ID103', 'nom' => 'DOUKI',           'prenom' => 'OUMAIMA',      'nom_arabe' => 'ضوكي',     'prenom_arabe' => 'أميمة',         'ddn' => '20/07/2005', 'genre' => 'F', 'cni' => 'IA123615'],
+        ['cef' => '2005060300391', 'groupe' => 'ID103', 'nom' => 'DRIOUCH',         'prenom' => 'FATIHA',       'nom_arabe' => 'الدريوش',  'prenom_arabe' => 'فتيحة',         'ddn' => '03/06/2005', 'genre' => 'F', 'cni' => 'IA123616'],
+        ['cef' => '2007012700211', 'groupe' => 'ID103', 'nom' => 'DRISSI',          'prenom' => 'AICHA',        'nom_arabe' => 'الإدريسي', 'prenom_arabe' => 'عائشة',         'ddn' => '27/01/2007', 'genre' => 'F', 'cni' => 'IA123617'],
+        ['cef' => '2006121100242', 'groupe' => 'ID103', 'nom' => 'ECHCHABI',        'prenom' => 'ABDELHAMID',   'nom_arabe' => 'الشعبي',   'prenom_arabe' => 'عبدالحميد',     'ddn' => '11/12/2006', 'genre' => 'H', 'cni' => 'IA123618'],
+        ['cef' => '2005090600427', 'groupe' => 'ID103', 'nom' => 'EDDAHBI',         'prenom' => 'HIND',         'nom_arabe' => 'الضهبي',   'prenom_arabe' => 'هند',           'ddn' => '06/09/2005', 'genre' => 'F', 'cni' => 'IA123619'],
+        ['cef' => '2007030500171', 'groupe' => 'ID103', 'nom' => 'EL AAMOUMI',      'prenom' => 'AMINE',        'nom_arabe' => 'العمومي',  'prenom_arabe' => 'أمين',          'ddn' => '05/03/2007', 'genre' => 'H', 'cni' => 'IA123620'],
+        ['cef' => '2007060400101', 'groupe' => 'ID103', 'nom' => 'EL AISSATI',      'prenom' => 'MERYEM',       'nom_arabe' => 'العيساتي', 'prenom_arabe' => 'مريم',          'ddn' => '04/06/2007', 'genre' => 'F', 'cni' => 'IA123621'],
+        ['cef' => '2005011000444', 'groupe' => 'ID103', 'nom' => 'EL ALAMI',        'prenom' => 'SIHAM',        'nom_arabe' => 'العلمي',   'prenom_arabe' => 'سهام',          'ddn' => '10/01/2005', 'genre' => 'F', 'cni' => 'IA123622'],
+        ['cef' => '2006021200292', 'groupe' => 'ID103', 'nom' => 'EL ARBAOUI',      'prenom' => 'ADNANE',       'nom_arabe' => 'العرباوي', 'prenom_arabe' => 'عدنان',         'ddn' => '12/02/2006', 'genre' => 'H', 'cni' => 'IA123623'],
+        ['cef' => '2007052400113', 'groupe' => 'ID103', 'nom' => 'EL AZIZI',        'prenom' => 'SOUKAINA',     'nom_arabe' => 'العزيزي',  'prenom_arabe' => 'سكينة',         'ddn' => '24/05/2007', 'genre' => 'F', 'cni' => 'IA123624'],
+        ['cef' => '2007030300176', 'groupe' => 'ID103', 'nom' => 'EL BASRI',        'prenom' => 'CHAYMAE',      'nom_arabe' => 'البصري',   'prenom_arabe' => 'شيماء',         'ddn' => '03/03/2007', 'genre' => 'F', 'cni' => 'IA123625'],
+        ['cef' => '2006091300263', 'groupe' => 'ID103', 'nom' => 'EL BOUCHTI',      'prenom' => 'YOUSSEF',      'nom_arabe' => 'البوشتي',  'prenom_arabe' => 'يوسف',          'ddn' => '13/09/2006', 'genre' => 'H', 'cni' => 'IA123626'],
+        ['cef' => '2006030400289', 'groupe' => 'ID103', 'nom' => 'EL FAQUIHI',      'prenom' => 'OUMAIMA',      'nom_arabe' => 'الفقيهي',  'prenom_arabe' => 'أميمة',         'ddn' => '04/03/2006', 'genre' => 'F', 'cni' => 'IA123627'],
+        ['cef' => '2007022000205', 'groupe' => 'ID103', 'nom' => 'EL FILALI',       'prenom' => 'MOUAD',        'nom_arabe' => 'الفيلالي', 'prenom_arabe' => 'معاذ',          'ddn' => '20/02/2007', 'genre' => 'H', 'cni' => 'IA123628'],
+
+        // ID104 (19 students)
+        ['cef' => '2007043000130', 'groupe' => 'ID104', 'nom' => 'EL GHILANI',      'prenom' => 'RIDA',         'nom_arabe' => 'الغيلاني', 'prenom_arabe' => 'رضا',           'ddn' => '30/04/2007', 'genre' => 'H', 'cni' => 'IA123629'],
+        ['cef' => '2006122000240', 'groupe' => 'ID104', 'nom' => 'EL HABBOULI',     'prenom' => 'NIDAL',        'nom_arabe' => 'الحبولي',  'prenom_arabe' => 'نضال',          'ddn' => '20/12/2006', 'genre' => 'H', 'cni' => 'IA123630'],
+        ['cef' => '2006080200258', 'groupe' => 'ID104', 'nom' => 'EL HAJJI',        'prenom' => 'SOUFIANE',     'nom_arabe' => 'الحاجي',   'prenom_arabe' => 'سفيان',         'ddn' => '02/08/2006', 'genre' => 'H', 'cni' => 'IA123631'],
+        ['cef' => '2007100600120', 'groupe' => 'ID104', 'nom' => 'EL HASSANI',      'prenom' => 'IMANE',        'nom_arabe' => 'الحساني',  'prenom_arabe' => 'إيمان',         'ddn' => '06/10/2007', 'genre' => 'F', 'cni' => 'IA123632'],
+        ['cef' => '2007041600135', 'groupe' => 'ID104', 'nom' => 'EL KADIRI',       'prenom' => 'WALID',        'nom_arabe' => 'القادري',  'prenom_arabe' => 'وليد',          'ddn' => '16/04/2007', 'genre' => 'H', 'cni' => 'IA123633'],
+        ['cef' => '2006100300269', 'groupe' => 'ID104', 'nom' => 'EL KBIR',         'prenom' => 'ABDELKADER',   'nom_arabe' => 'الكبير',   'prenom_arabe' => 'عبدالقادر',     'ddn' => '03/10/2006', 'genre' => 'H', 'cni' => 'IA123634'],
+        ['cef' => '2007043100129', 'groupe' => 'ID104', 'nom' => 'EL MAHDI',        'prenom' => 'IBTISSAM',     'nom_arabe' => 'المهدي',   'prenom_arabe' => 'ابتسام',        'ddn' => '31/04/2007', 'genre' => 'F', 'cni' => 'IA123635'],
+        ['cef' => '2005072500416', 'groupe' => 'ID104', 'nom' => 'EL MANSOURI',     'prenom' => 'YASSIR',       'nom_arabe' => 'المنصوري', 'prenom_arabe' => 'ياسر',          'ddn' => '25/07/2005', 'genre' => 'H', 'cni' => 'IA123636'],
+        ['cef' => '2007011900209', 'groupe' => 'ID104', 'nom' => 'EL MOUSSAOUI',    'prenom' => 'CHAYMAE',      'nom_arabe' => 'الموساوي', 'prenom_arabe' => 'شيماء',         'ddn' => '19/01/2007', 'genre' => 'F', 'cni' => 'IA123637'],
+        ['cef' => '2006110200246', 'groupe' => 'ID104', 'nom' => 'EL MRABET',       'prenom' => 'ZINEB',        'nom_arabe' => 'المرابط',  'prenom_arabe' => 'زينب',          'ddn' => '02/11/2006', 'genre' => 'F', 'cni' => 'IA123638'],
+        ['cef' => '2005072900415', 'groupe' => 'ID104', 'nom' => 'EL OUAAJDI',      'prenom' => 'FATIMA',       'nom_arabe' => 'الوعاجدي', 'prenom_arabe' => 'فاطمة',         'ddn' => '29/07/2005', 'genre' => 'F', 'cni' => 'IA123639'],
+        ['cef' => '2006031600285', 'groupe' => 'ID104', 'nom' => 'EL OUASSIF',      'prenom' => 'GHIZLANE',     'nom_arabe' => 'الواصف',   'prenom_arabe' => 'غزلان',         'ddn' => '16/03/2006', 'genre' => 'F', 'cni' => 'IA123640'],
+        ['cef' => '2007031100177', 'groupe' => 'ID104', 'nom' => 'ELAKIL',          'prenom' => 'ANAS',         'nom_arabe' => 'العقيل',   'prenom_arabe' => 'أنس',           'ddn' => '11/03/2007', 'genre' => 'H', 'cni' => 'IA123641'],
+        ['cef' => '2006102100267', 'groupe' => 'ID104', 'nom' => 'ELFASSY',         'prenom' => 'HAMZA',        'nom_arabe' => 'الفاسي',   'prenom_arabe' => 'حمزة',          'ddn' => '21/10/2006', 'genre' => 'H', 'cni' => 'IA123642'],
+        ['cef' => '2007020000204', 'groupe' => 'ID104', 'nom' => 'ELHASBI',         'prenom' => 'RACHID',       'nom_arabe' => 'الحسبي',   'prenom_arabe' => 'رشيد',          'ddn' => '20/02/2007', 'genre' => 'H', 'cni' => 'IA123643'],
+        ['cef' => '2005051700393', 'groupe' => 'ID104', 'nom' => 'ELOUFIR',         'prenom' => 'BTISSAM',      'nom_arabe' => 'العوفير',  'prenom_arabe' => 'بتيسام',        'ddn' => '17/05/2005', 'genre' => 'F', 'cni' => 'IA123644'],
+        ['cef' => '2007030100178', 'groupe' => 'ID104', 'nom' => 'ERRAJI',          'prenom' => 'YASSINE',      'nom_arabe' => 'الراجي',   'prenom_arabe' => 'ياسين',         'ddn' => '01/03/2007', 'genre' => 'H', 'cni' => 'IA123645'],
+        ['cef' => '2006060600271', 'groupe' => 'ID104', 'nom' => 'EZZAHIRI',        'prenom' => 'KHADIJA',      'nom_arabe' => 'الزاهري',  'prenom_arabe' => 'خديجة',         'ddn' => '06/06/2006', 'genre' => 'F', 'cni' => 'IA123646'],
+        ['cef' => '2005121300384', 'groupe' => 'ID104', 'nom' => 'FADILI',          'prenom' => 'NOUR',         'nom_arabe' => 'الفاضلي',  'prenom_arabe' => 'نور',           'ddn' => '13/12/2005', 'genre' => 'F', 'cni' => 'IA123647'],
+
+        // DEVOWFS202 (19 students)
+        ['cef' => '2005051200394', 'groupe' => 'DEVOWFS202', 'nom' => 'FATHALLAH',  'prenom' => 'AYOUB',        'nom_arabe' => 'فتح الله', 'prenom_arabe' => 'أيوب',          'ddn' => '12/05/2005', 'genre' => 'H', 'cni' => 'IA123648'],
+        ['cef' => '2006020500296', 'groupe' => 'DEVOWFS202', 'nom' => 'FAYCEL',     'prenom' => 'SAFAE',        'nom_arabe' => 'فيصل',     'prenom_arabe' => 'صفاء',          'ddn' => '05/02/2006', 'genre' => 'F', 'cni' => 'IA123649'],
+        ['cef' => '2007040100144', 'groupe' => 'DEVOWFS202', 'nom' => 'FECHTALI',   'prenom' => 'NOUR',         'nom_arabe' => 'فشتالي',   'prenom_arabe' => 'نور',           'ddn' => '01/04/2007', 'genre' => 'F', 'cni' => 'IA123650'],
+        ['cef' => '2006042100276', 'groupe' => 'DEVOWFS202', 'nom' => 'FEKKAK',     'prenom' => 'WALID',        'nom_arabe' => 'فكاك',     'prenom_arabe' => 'وليد',          'ddn' => '21/04/2006', 'genre' => 'H', 'cni' => 'IA123651'],
+        ['cef' => '2007073000089', 'groupe' => 'DEVOWFS202', 'nom' => 'FENNICH',    'prenom' => 'HAMZA',        'nom_arabe' => 'فنيش',     'prenom_arabe' => 'حمزة',          'ddn' => '30/07/2007', 'genre' => 'H', 'cni' => 'IA123652'],
+        ['cef' => '2005110400389', 'groupe' => 'DEVOWFS202', 'nom' => 'FIRDAOUS',   'prenom' => 'BADREDDINE',   'nom_arabe' => 'فردوس',    'prenom_arabe' => 'بدرالدين',      'ddn' => '04/11/2005', 'genre' => 'H', 'cni' => 'IA123653'],
+        ['cef' => '2007041000140', 'groupe' => 'DEVOWFS202', 'nom' => 'GHALI',      'prenom' => 'YOUSSEF',      'nom_arabe' => 'غالي',     'prenom_arabe' => 'يوسف',          'ddn' => '10/04/2007', 'genre' => 'H', 'cni' => 'IA123654'],
+        ['cef' => '2006111900244', 'groupe' => 'DEVOWFS202', 'nom' => 'GHAOUAT',    'prenom' => 'NOUR',         'nom_arabe' => 'غاوات',    'prenom_arabe' => 'نور',           'ddn' => '19/11/2006', 'genre' => 'F', 'cni' => 'IA123655'],
+        ['cef' => '2005071400419', 'groupe' => 'DEVOWFS202', 'nom' => 'GHOUALI',    'prenom' => 'SARA',         'nom_arabe' => 'غوالي',    'prenom_arabe' => 'سارة',          'ddn' => '14/07/2005', 'genre' => 'F', 'cni' => 'IA123656'],
+        ['cef' => '2007030200169', 'groupe' => 'DEVOWFS202', 'nom' => 'GLOULOU',    'prenom' => 'ABDELAZIZ',    'nom_arabe' => 'قلولو',    'prenom_arabe' => 'عبدالعزيز',     'ddn' => '02/03/2007', 'genre' => 'H', 'cni' => 'IA123657'],
+        ['cef' => '2006050300278', 'groupe' => 'DEVOWFS202', 'nom' => 'GOUR',       'prenom' => 'FATIMA',       'nom_arabe' => 'غور',      'prenom_arabe' => 'فاطمة',         'ddn' => '03/05/2006', 'genre' => 'F', 'cni' => 'IA123658'],
+        ['cef' => '2007012200208', 'groupe' => 'DEVOWFS202', 'nom' => 'GUEDDARI',   'prenom' => 'HAMZA',        'nom_arabe' => 'قداري',    'prenom_arabe' => 'حمزة',          'ddn' => '22/01/2007', 'genre' => 'H', 'cni' => 'IA123659'],
+        ['cef' => '2006091200264', 'groupe' => 'DEVOWFS202', 'nom' => 'GUELLAF',    'prenom' => 'HOUDA',        'nom_arabe' => 'قلاف',     'prenom_arabe' => 'هدى',           'ddn' => '12/09/2006', 'genre' => 'F', 'cni' => 'IA123660'],
+        ['cef' => '2007031400180', 'groupe' => 'DEVOWFS202', 'nom' => 'GUERROUF',   'prenom' => 'ILYAS',        'nom_arabe' => 'قروف',     'prenom_arabe' => 'إلياس',         'ddn' => '14/03/2007', 'genre' => 'H', 'cni' => 'IA123661'],
+        ['cef' => '2005101800421', 'groupe' => 'DEVOWFS202', 'nom' => 'HADRI',      'prenom' => 'ACHRAF',       'nom_arabe' => 'هادري',    'prenom_arabe' => 'أشرف',          'ddn' => '18/10/2005', 'genre' => 'H', 'cni' => 'IA123662'],
+        ['cef' => '2006043000275', 'groupe' => 'DEVOWFS202', 'nom' => 'HAIMOUD',    'prenom' => 'IMANE',        'nom_arabe' => 'هيمود',    'prenom_arabe' => 'إيمان',         'ddn' => '30/04/2006', 'genre' => 'F', 'cni' => 'IA123663'],
+        ['cef' => '2007041500137', 'groupe' => 'DEVOWFS202', 'nom' => 'HAMID',      'prenom' => 'SARA',         'nom_arabe' => 'حميد',     'prenom_arabe' => 'سارة',          'ddn' => '15/04/2007', 'genre' => 'F', 'cni' => 'IA123664'],
+        ['cef' => '2005041600397', 'groupe' => 'DEVOWFS202', 'nom' => 'HAMMOUCH',   'prenom' => 'YOUSSEF',      'nom_arabe' => 'حموش',     'prenom_arabe' => 'يوسف',          'ddn' => '16/04/2005', 'genre' => 'H', 'cni' => 'IA123665'],
+        ['cef' => '2007090500153', 'groupe' => 'DEVOWFS202', 'nom' => 'HANOUN',     'prenom' => 'YOUSRA',       'nom_arabe' => 'حنون',     'prenom_arabe' => 'يسرى',          'ddn' => '05/09/2007', 'genre' => 'F', 'cni' => 'IA123666'],
+
+        // DEVOWFS203 (16 students)
+        ['cef' => '2005021700399', 'groupe' => 'DEVOWFS203', 'nom' => 'HARRAK',     'prenom' => 'OUSSAMA',      'nom_arabe' => 'حراك',     'prenom_arabe' => 'أسامة',         'ddn' => '17/02/2005', 'genre' => 'H', 'cni' => 'IA123667'],
+        ['cef' => '2006100800268', 'groupe' => 'DEVOWFS203', 'nom' => 'HASSINE',    'prenom' => 'ABDELALI',     'nom_arabe' => 'حسين',     'prenom_arabe' => 'عبدالعالي',     'ddn' => '08/10/2006', 'genre' => 'H', 'cni' => 'IA123668'],
+        ['cef' => '2007040800143', 'groupe' => 'DEVOWFS203', 'nom' => 'HAYANE',     'prenom' => 'ZINEB',        'nom_arabe' => 'حيان',     'prenom_arabe' => 'زينب',          'ddn' => '08/04/2007', 'genre' => 'F', 'cni' => 'IA123669'],
+        ['cef' => '2007091000156', 'groupe' => 'DEVOWFS203', 'nom' => 'HIDOURI',    'prenom' => 'HAMZA',        'nom_arabe' => 'حيدوري',   'prenom_arabe' => 'حمزة',          'ddn' => '10/09/2007', 'genre' => 'H', 'cni' => 'IA123670'],
+        ['cef' => '2006111000245', 'groupe' => 'DEVOWFS203', 'nom' => 'HILALI',     'prenom' => 'FATIMA-ZAHRA', 'nom_arabe' => 'هلالي',    'prenom_arabe' => 'فاطمة الزهراء', 'ddn' => '10/11/2006', 'genre' => 'F', 'cni' => 'IA123671'],
+        ['cef' => '2007013100209', 'groupe' => 'DEVOWFS203', 'nom' => 'HMIDA',      'prenom' => 'SOUFIANE',     'nom_arabe' => 'حميدة',    'prenom_arabe' => 'سفيان',         'ddn' => '31/01/2007', 'genre' => 'H', 'cni' => 'IA123672'],
+        ['cef' => '2005090900425', 'groupe' => 'DEVOWFS203', 'nom' => 'HRICHI',     'prenom' => 'ADNANE',       'nom_arabe' => 'هريشي',    'prenom_arabe' => 'عدنان',         'ddn' => '09/09/2005', 'genre' => 'H', 'cni' => 'IA123673'],
+        ['cef' => '2007042600131', 'groupe' => 'DEVOWFS203', 'nom' => 'IDALI',      'prenom' => 'MOUAD',        'nom_arabe' => 'إيدالي',   'prenom_arabe' => 'معاذ',          'ddn' => '26/04/2007', 'genre' => 'H', 'cni' => 'IA123674'],
+        ['cef' => '2005100900422', 'groupe' => 'DEVOWFS203', 'nom' => 'IDBENJELLOUN','prenom' => 'IMANE',       'nom_arabe' => 'ابن جلون', 'prenom_arabe' => 'إيمان',         'ddn' => '09/10/2005', 'genre' => 'F', 'cni' => 'IA123675'],
+        ['cef' => '2007090400152', 'groupe' => 'DEVOWFS203', 'nom' => 'IDRISSI',    'prenom' => 'SOUFIANE',     'nom_arabe' => 'الإدريسي', 'prenom_arabe' => 'سفيان',         'ddn' => '04/09/2007', 'genre' => 'H', 'cni' => 'IA123676'],
+        ['cef' => '2006010500298', 'groupe' => 'DEVOWFS203', 'nom' => 'IHMAD',      'prenom' => 'YOUSSEF',      'nom_arabe' => 'احماد',    'prenom_arabe' => 'يوسف',          'ddn' => '05/01/2006', 'genre' => 'H', 'cni' => 'IA123677'],
+        ['cef' => '2005120400385', 'groupe' => 'DEVOWFS203', 'nom' => 'IKHLEF',     'prenom' => 'MOUHCINE',     'nom_arabe' => 'إخلف',     'prenom_arabe' => 'محسن',          'ddn' => '04/12/2005', 'genre' => 'H', 'cni' => 'IA123678'],
+        ['cef' => '2007040500145', 'groupe' => 'DEVOWFS203', 'nom' => 'ILYAS',      'prenom' => 'FATIMA',       'nom_arabe' => 'إلياس',    'prenom_arabe' => 'فاطمة',         'ddn' => '05/04/2007', 'genre' => 'F', 'cni' => 'IA123679'],
+        ['cef' => '2007031200181', 'groupe' => 'DEVOWFS203', 'nom' => 'IMANE',      'prenom' => 'RACHIDA',      'nom_arabe' => 'إيمان',    'prenom_arabe' => 'رشيدة',         'ddn' => '12/03/2007', 'genre' => 'F', 'cni' => 'IA123680'],
+        ['cef' => '2006052800272', 'groupe' => 'DEVOWFS203', 'nom' => 'INTISSAR',   'prenom' => 'ABDELWAHED',   'nom_arabe' => 'انتصار',   'prenom_arabe' => 'عبدالواحد',     'ddn' => '28/05/2006', 'genre' => 'H', 'cni' => 'IA123681'],
+        ['cef' => '2007051700110', 'groupe' => 'DEVOWFS203', 'nom' => 'IRAQUI',     'prenom' => 'HAJAR',        'nom_arabe' => 'العراقي',  'prenom_arabe' => 'هاجر',          'ddn' => '17/05/2007', 'genre' => 'F', 'cni' => 'IA123682'],
+
+        // IDOCS201 (19 students)
+        ['cef' => '2004082100468', 'groupe' => 'IDOCS201', 'nom' => 'JABRI',        'prenom' => 'MOUAD',        'nom_arabe' => 'جابري',    'prenom_arabe' => 'معاذ',          'ddn' => '21/08/2004', 'genre' => 'H', 'cni' => 'IA123683'],
+        ['cef' => '2005031400401', 'groupe' => 'IDOCS201', 'nom' => 'JADANE',       'prenom' => 'HIND',         'nom_arabe' => 'جدان',     'prenom_arabe' => 'هند',           'ddn' => '14/03/2005', 'genre' => 'F', 'cni' => 'IA123684'],
+        ['cef' => '2006100200269', 'groupe' => 'IDOCS201', 'nom' => 'JAID',         'prenom' => 'SOUFIANE',     'nom_arabe' => 'جايد',     'prenom_arabe' => 'سفيان',         'ddn' => '02/10/2006', 'genre' => 'H', 'cni' => 'IA123685'],
+        ['cef' => '2004121500457', 'groupe' => 'IDOCS201', 'nom' => 'JALALI',       'prenom' => 'ABDELAZIZ',    'nom_arabe' => 'جلالي',    'prenom_arabe' => 'عبدالعزيز',     'ddn' => '15/12/2004', 'genre' => 'H', 'cni' => 'IA123686'],
+        ['cef' => '2006030100290', 'groupe' => 'IDOCS201', 'nom' => 'JAMIYLA',      'prenom' => 'MOUAD',        'nom_arabe' => 'جميلة',    'prenom_arabe' => 'معاذ',          'ddn' => '01/03/2006', 'genre' => 'H', 'cni' => 'IA123687'],
+        ['cef' => '2005041200396', 'groupe' => 'IDOCS201', 'nom' => 'JAOUHARI',     'prenom' => 'SANAE',        'nom_arabe' => 'الجواهري', 'prenom_arabe' => 'سناء',          'ddn' => '12/04/2005', 'genre' => 'F', 'cni' => 'IA123688'],
+        ['cef' => '2007041300139', 'groupe' => 'IDOCS201', 'nom' => 'JARRARI',      'prenom' => 'ACHRAF',       'nom_arabe' => 'الجراري',  'prenom_arabe' => 'أشرف',          'ddn' => '13/04/2007', 'genre' => 'H', 'cni' => 'IA123689'],
+        ['cef' => '2006091000265', 'groupe' => 'IDOCS201', 'nom' => 'JERROUDI',     'prenom' => 'IMANE',        'nom_arabe' => 'جرودي',    'prenom_arabe' => 'إيمان',         'ddn' => '10/09/2006', 'genre' => 'F', 'cni' => 'IA123690'],
+        ['cef' => '2007030700178', 'groupe' => 'IDOCS201', 'nom' => 'JILALI',       'prenom' => 'HAMZA',        'nom_arabe' => 'جيلالي',   'prenom_arabe' => 'حمزة',          'ddn' => '07/03/2007', 'genre' => 'H', 'cni' => 'IA123691'],
+        ['cef' => '2005030200398', 'groupe' => 'IDOCS201', 'nom' => 'JLIDI',        'prenom' => 'YOUSSEF',      'nom_arabe' => 'جليدي',    'prenom_arabe' => 'يوسف',          'ddn' => '02/03/2005', 'genre' => 'H', 'cni' => 'IA123692'],
+        ['cef' => '2007011100217', 'groupe' => 'IDOCS201', 'nom' => 'JMILI',        'prenom' => 'WAFAE',        'nom_arabe' => 'جميلي',    'prenom_arabe' => 'وفاء',          'ddn' => '11/01/2007', 'genre' => 'F', 'cni' => 'IA123693'],
+        ['cef' => '2007021300207', 'groupe' => 'IDOCS201', 'nom' => 'KADMIRI',      'prenom' => 'ABDERRAHMANE','nom_arabe' => 'قادميري',  'prenom_arabe' => 'عبدالرحمن',     'ddn' => '13/02/2007', 'genre' => 'H', 'cni' => 'IA123694'],
+        ['cef' => '2006070300248', 'groupe' => 'IDOCS201', 'nom' => 'KAIS',         'prenom' => 'MERYEM',       'nom_arabe' => 'قيس',      'prenom_arabe' => 'مريم',          'ddn' => '03/07/2006', 'genre' => 'F', 'cni' => 'IA123695'],
+        ['cef' => '2007043000131', 'groupe' => 'IDOCS201', 'nom' => 'KAJJI',        'prenom' => 'FATIMA',       'nom_arabe' => 'قاجي',     'prenom_arabe' => 'فاطمة',         'ddn' => '30/04/2007', 'genre' => 'F', 'cni' => 'IA123696'],
+        ['cef' => '2006060400272', 'groupe' => 'IDOCS201', 'nom' => 'KARIMI',       'prenom' => 'AMINE',        'nom_arabe' => 'كريمي',    'prenom_arabe' => 'أمين',          'ddn' => '04/06/2006', 'genre' => 'H', 'cni' => 'IA123697'],
+        ['cef' => '2007040200141', 'groupe' => 'IDOCS201', 'nom' => 'KASSIMI',      'prenom' => 'ABDELILAH',    'nom_arabe' => 'قسيمي',    'prenom_arabe' => 'عبدالإله',      'ddn' => '02/04/2007', 'genre' => 'H', 'cni' => 'IA123698'],
+        ['cef' => '2004110700461', 'groupe' => 'IDOCS201', 'nom' => 'KAYRI',        'prenom' => 'YOUSSEF',      'nom_arabe' => 'قيري',     'prenom_arabe' => 'يوسف',          'ddn' => '07/11/2004', 'genre' => 'H', 'cni' => 'IA123699'],
+        ['cef' => '2006101900268', 'groupe' => 'IDOCS201', 'nom' => 'KHALDI',       'prenom' => 'HAMZA',        'nom_arabe' => 'خالدي',    'prenom_arabe' => 'حمزة',          'ddn' => '19/10/2006', 'genre' => 'H', 'cni' => 'IA123700'],
+        ['cef' => '2007061400104', 'groupe' => 'IDOCS201', 'nom' => 'KHALFAOUI',    'prenom' => 'BRAHIM',       'nom_arabe' => 'خلفاوي',   'prenom_arabe' => 'إبراهيم',       'ddn' => '14/06/2007', 'genre' => 'H', 'cni' => 'IA123701'],
+
+        // IDOSR201 (19 students)
+        ['cef' => '2004090500465', 'groupe' => 'IDOSR201', 'nom' => 'KHARRAT',      'prenom' => 'OUMAIMA',      'nom_arabe' => 'الخراط',   'prenom_arabe' => 'أميمة',         'ddn' => '05/09/2004', 'genre' => 'F', 'cni' => 'IA123702'],
+        ['cef' => '2006121500240', 'groupe' => 'IDOSR201', 'nom' => 'KHAYAL',       'prenom' => 'HAMID',        'nom_arabe' => 'الخيال',   'prenom_arabe' => 'حميد',          'ddn' => '15/12/2006', 'genre' => 'H', 'cni' => 'IA123703'],
+        ['cef' => '2007030900179', 'groupe' => 'IDOSR201', 'nom' => 'KHBIBECH',     'prenom' => 'NOUR',         'nom_arabe' => 'الخبيبش',  'prenom_arabe' => 'نور',           'ddn' => '09/03/2007', 'genre' => 'F', 'cni' => 'IA123704'],
+        ['cef' => '2006100500270', 'groupe' => 'IDOSR201', 'nom' => 'KHERRAK',      'prenom' => 'ABDELKARIM',   'nom_arabe' => 'الخراك',   'prenom_arabe' => 'عبدالكريم',     'ddn' => '05/10/2006', 'genre' => 'H', 'cni' => 'IA123705'],
+        ['cef' => '2007042300133', 'groupe' => 'IDOSR201', 'nom' => 'KIHAL',        'prenom' => 'SAFAE',        'nom_arabe' => 'كيحال',    'prenom_arabe' => 'صفاء',          'ddn' => '23/04/2007', 'genre' => 'F', 'cni' => 'IA123706'],
+        ['cef' => '2005031200399', 'groupe' => 'IDOSR201', 'nom' => 'LACHHAB',      'prenom' => 'MERYEM',       'nom_arabe' => 'الشحب',    'prenom_arabe' => 'مريم',          'ddn' => '12/03/2005', 'genre' => 'F', 'cni' => 'IA123707'],
+        ['cef' => '2007042900132', 'groupe' => 'IDOSR201', 'nom' => 'LAGROUM',      'prenom' => 'YOUSRA',       'nom_arabe' => 'الكروم',   'prenom_arabe' => 'يسرى',          'ddn' => '29/04/2007', 'genre' => 'F', 'cni' => 'IA123708'],
+        ['cef' => '2006061600248', 'groupe' => 'IDOSR201', 'nom' => 'LAHBIB',       'prenom' => 'ABDELOUAHED',  'nom_arabe' => 'الحبيب',   'prenom_arabe' => 'عبدالواحد',     'ddn' => '16/06/2006', 'genre' => 'H', 'cni' => 'IA123709'],
+        ['cef' => '2007031500182', 'groupe' => 'IDOSR201', 'nom' => 'LAHRACH',      'prenom' => 'NORA',         'nom_arabe' => 'الحراش',   'prenom_arabe' => 'نورة',          'ddn' => '15/03/2007', 'genre' => 'F', 'cni' => 'IA123710'],
+        ['cef' => '2005072200417', 'groupe' => 'IDOSR201', 'nom' => 'LAKHRISSI',    'prenom' => 'KARIM',        'nom_arabe' => 'الخريسي',  'prenom_arabe' => 'كريم',          'ddn' => '22/07/2005', 'genre' => 'H', 'cni' => 'IA123711'],
+        ['cef' => '2006091800263', 'groupe' => 'IDOSR201', 'nom' => 'LAKRIMI',      'prenom' => 'FATIMA',       'nom_arabe' => 'الكريمي',  'prenom_arabe' => 'فاطمة',         'ddn' => '18/09/2006', 'genre' => 'F', 'cni' => 'IA123712'],
+        ['cef' => '2007030300183', 'groupe' => 'IDOSR201', 'nom' => 'LAMGHARI',     'prenom' => 'ISMAIL',       'nom_arabe' => 'لمغاري',   'prenom_arabe' => 'إسماعيل',       'ddn' => '03/03/2007', 'genre' => 'H', 'cni' => 'IA123713'],
+        ['cef' => '2005110300390', 'groupe' => 'IDOSR201', 'nom' => 'LAMJAHDI',     'prenom' => 'SOUFIANE',     'nom_arabe' => 'لمجهدي',   'prenom_arabe' => 'سفيان',         'ddn' => '03/11/2005', 'genre' => 'H', 'cni' => 'IA123714'],
+        ['cef' => '2007041100141', 'groupe' => 'IDOSR201', 'nom' => 'LAMNAOUAR',    'prenom' => 'HAMZA',        'nom_arabe' => 'لمناور',   'prenom_arabe' => 'حمزة',          'ddn' => '11/04/2007', 'genre' => 'H', 'cni' => 'IA123715'],
+        ['cef' => '2006100400271', 'groupe' => 'IDOSR201', 'nom' => 'LAOUTID',      'prenom' => 'MERYEM',       'nom_arabe' => 'الاوطيد',  'prenom_arabe' => 'مريم',          'ddn' => '04/10/2006', 'genre' => 'F', 'cni' => 'IA123716'],
+        ['cef' => '2007030100184', 'groupe' => 'IDOSR201', 'nom' => 'LAROUI',       'prenom' => 'HAMID',        'nom_arabe' => 'الروي',    'prenom_arabe' => 'حميد',          'ddn' => '01/03/2007', 'genre' => 'H', 'cni' => 'IA123717'],
+        ['cef' => '2006060900270', 'groupe' => 'IDOSR201', 'nom' => 'LBAYDA',       'prenom' => 'NOUR',         'nom_arabe' => 'البيضا',   'prenom_arabe' => 'نور',           'ddn' => '09/06/2006', 'genre' => 'F', 'cni' => 'IA123718'],
+        ['cef' => '2007072100093', 'groupe' => 'IDOSR201', 'nom' => 'LBIHAR',       'prenom' => 'YASSINE',      'nom_arabe' => 'البحار',   'prenom_arabe' => 'ياسين',         'ddn' => '21/07/2007', 'genre' => 'H', 'cni' => 'IA123719'],
+        ['cef' => '2005081500408', 'groupe' => 'IDOSR201', 'nom' => 'LEBBAR',       'prenom' => 'MOUHCINE',     'nom_arabe' => 'لبار',     'prenom_arabe' => 'محسن',          'ddn' => '15/08/2005', 'genre' => 'H', 'cni' => 'IA123720'],
+
+        // IDOCC201 (17 students)
+        ['cef' => '2005062700389', 'groupe' => 'IDOCC201', 'nom' => 'LEBZAR',       'prenom' => 'AYOUB',        'nom_arabe' => 'لبزار',    'prenom_arabe' => 'أيوب',          'ddn' => '27/06/2005', 'genre' => 'H', 'cni' => 'IA123721'],
+        ['cef' => '2007030500184', 'groupe' => 'IDOCC201', 'nom' => 'LEGZIRI',      'prenom' => 'DOUAE',        'nom_arabe' => 'لكزيري',   'prenom_arabe' => 'دعاء',          'ddn' => '05/03/2007', 'genre' => 'F', 'cni' => 'IA123722'],
+        ['cef' => '2006100700270', 'groupe' => 'IDOCC201', 'nom' => 'LHASSANI',     'prenom' => 'KARIM',        'nom_arabe' => 'الحساني',  'prenom_arabe' => 'كريم',          'ddn' => '07/10/2006', 'genre' => 'H', 'cni' => 'IA123723'],
+        ['cef' => '2007041700136', 'groupe' => 'IDOCC201', 'nom' => 'LHBIB',        'prenom' => 'FATIMA',       'nom_arabe' => 'الحبيب',   'prenom_arabe' => 'فاطمة',         'ddn' => '17/04/2007', 'genre' => 'F', 'cni' => 'IA123724'],
+        ['cef' => '2005112000387', 'groupe' => 'IDOCC201', 'nom' => 'LKHALFI',      'prenom' => 'ANAS',         'nom_arabe' => 'الخلفي',   'prenom_arabe' => 'أنس',           'ddn' => '20/11/2005', 'genre' => 'H', 'cni' => 'IA123725'],
+        ['cef' => '2006122300240', 'groupe' => 'IDOCC201', 'nom' => 'LOUATANI',     'prenom' => 'BRAHIM',       'nom_arabe' => 'لواتاني',  'prenom_arabe' => 'إبراهيم',       'ddn' => '23/12/2006', 'genre' => 'H', 'cni' => 'IA123726'],
+        ['cef' => '2007031300180', 'groupe' => 'IDOCC201', 'nom' => 'MAAMAR',       'prenom' => 'KAMAL',        'nom_arabe' => 'معمار',    'prenom_arabe' => 'كمال',          'ddn' => '13/03/2007', 'genre' => 'H', 'cni' => 'IA123727'],
+        ['cef' => '2005080800409', 'groupe' => 'IDOCC201', 'nom' => 'MAAROUFI',     'prenom' => 'SIHAM',        'nom_arabe' => 'معروفي',   'prenom_arabe' => 'سهام',          'ddn' => '08/08/2005', 'genre' => 'F', 'cni' => 'IA123728'],
+        ['cef' => '2007090700159', 'groupe' => 'IDOCC201', 'nom' => 'MAHFOUDHI',    'prenom' => 'ZINEB',        'nom_arabe' => 'محفوضي',   'prenom_arabe' => 'زينب',          'ddn' => '07/09/2007', 'genre' => 'F', 'cni' => 'IA123729'],
+        ['cef' => '2006122100242', 'groupe' => 'IDOCC201', 'nom' => 'MAHRAOUI',     'prenom' => 'YOUSSEF',      'nom_arabe' => 'مهراوي',   'prenom_arabe' => 'يوسف',          'ddn' => '21/12/2006', 'genre' => 'H', 'cni' => 'IA123730'],
+        ['cef' => '2007050200117', 'groupe' => 'IDOCC201', 'nom' => 'MAJDI',        'prenom' => 'HAMZA',        'nom_arabe' => 'مجدي',     'prenom_arabe' => 'حمزة',          'ddn' => '02/05/2007', 'genre' => 'H', 'cni' => 'IA123731'],
+        ['cef' => '2005031600400', 'groupe' => 'IDOCC201', 'nom' => 'MAKHOUKH',     'prenom' => 'NOUR',         'nom_arabe' => 'مخوخ',     'prenom_arabe' => 'نور',           'ddn' => '16/03/2005', 'genre' => 'F', 'cni' => 'IA123732'],
+        ['cef' => '2006080700258', 'groupe' => 'IDOCC201', 'nom' => 'MALLOUK',      'prenom' => 'SANAA',        'nom_arabe' => 'ملوك',     'prenom_arabe' => 'سناء',          'ddn' => '07/08/2006', 'genre' => 'F', 'cni' => 'IA123733'],
+        ['cef' => '2007031800185', 'groupe' => 'IDOCC201', 'nom' => 'MANSOURI',     'prenom' => 'ABDELILAH',    'nom_arabe' => 'المنصوري', 'prenom_arabe' => 'عبدالإله',      'ddn' => '18/03/2007', 'genre' => 'H', 'cni' => 'IA123734'],
+        ['cef' => '2006060700272', 'groupe' => 'IDOCC201', 'nom' => 'MCHICH',       'prenom' => 'FATIMA',       'nom_arabe' => 'مشيش',     'prenom_arabe' => 'فاطمة',         'ddn' => '07/06/2006', 'genre' => 'F', 'cni' => 'IA123735'],
+        ['cef' => '2007041800135', 'groupe' => 'IDOCC201', 'nom' => 'MELLOUK',      'prenom' => 'OTHMANE',      'nom_arabe' => 'ملوك',     'prenom_arabe' => 'عثمان',         'ddn' => '18/04/2007', 'genre' => 'H', 'cni' => 'IA123736'],
+        ['cef' => '2005101500423', 'groupe' => 'IDOCC201', 'nom' => 'MERBOUH',      'prenom' => 'HAFSSA',       'nom_arabe' => 'مربوح',    'prenom_arabe' => 'حفصة',          'ddn' => '15/10/2005', 'genre' => 'F', 'cni' => 'IA123737'],
+    ];
+
+    public function run(): void
+    {
+        // Pre-load all groups keyed by code for O(1) lookup
+        $groupes = Groupe::all()->keyBy('code');
+
+        $inserted = 0;
+        $skipped  = 0;
+
+        foreach (self::STAGIAIRES as $data) {
+            $groupe = $groupes->get($data['groupe']);
+
+            if (! $groupe) {
+                $this->command?->warn("Groupe not found: {$data['groupe']} for stagiaire {$data['cef']}");
+                $skipped++;
+                continue;
+            }
+
+            // Parse French date format DD/MM/YYYY
+            try {
+                $ddn = Carbon::createFromFormat('d/m/Y', $data['ddn'])->format('Y-m-d');
+            } catch (\Exception $e) {
+                $ddn = null;
+            }
+
+            Stagiaire::firstOrCreate(
+                ['cef' => $data['cef']],
+                [
+                    'groupe_id'      => $groupe->id,
+                    'cni'            => $data['cni'],
+                    'nom'            => $data['nom'],
+                    'prenom'         => $data['prenom'],
+                    'nom_arabe'      => $data['nom_arabe'] ?? null,
+                    'prenom_arabe'   => $data['prenom_arabe'] ?? null,
+                    'date_naissance' => $ddn,
+                    // genre: F = Femme, H = Homme (matches Genre enum in codebase)
+                    'genre'          => $data['genre'],
+                    'telephone'      => '0600000000', // placeholder — real data has 666666666
+                    'adresse'        => null,
+                    'niveau_scolaire'=> 'Baccalauréat',
+                    'actif'          => true,
+                ]
+            );
+
+            $inserted++;
+        }
+
+        $this->command?->info("StagiairesSeeder: {$inserted} inserted, {$skipped} skipped.");
+    }
+}

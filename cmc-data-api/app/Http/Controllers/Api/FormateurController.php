@@ -2,21 +2,24 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\Formateur\StoreFormateurRequest;
-use App\Http\Requests\Formateur\UpdateFormateurRequest;
+use App\Filters\FormateurFilter;
 use App\Http\Resources\FormateurResource;
 use App\Models\Formateur;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
+/**
+ * Formateur data is sourced entirely from Base_Formateurs.xlsx imports —
+ * no write endpoints are exposed here. Only index/show remain.
+ */
 class FormateurController extends ApiController
 {
     /** @var array<int, string> */
-    private array $allowedIncludes = ['pole', 'affectations'];
+    private array $allowedIncludes = ['pole', 'affectations', 'affectations.module', 'affectations.groupe'];
 
     public function index(Request $request)
     {
         $query = Formateur::query()->orderBy('nom_prenom');
+        $this->withFilters($request, $query, FormateurFilter::class);
         $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
 
         return FormateurResource::collection($this->paginate($request, $query));
@@ -28,28 +31,4 @@ class FormateurController extends ApiController
 
         return new FormateurResource($formateur);
     }
-
-    public function store(StoreFormateurRequest $request)
-    {
-        $formateur = Formateur::query()->create($request->validated());
-
-        return (new FormateurResource($formateur))
-            ->response()
-            ->setStatusCode(Response::HTTP_CREATED);
-    }
-
-    public function update(UpdateFormateurRequest $request, Formateur $formateur)
-    {
-        $formateur->update($request->validated());
-
-        return new FormateurResource($formateur);
-    }
-
-    public function destroy(Formateur $formateur)
-    {
-        $formateur->delete();
-
-        return response()->noContent();
-    }
 }
-

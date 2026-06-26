@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Filters\QueryFilter;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 
 abstract class ApiController extends Controller
 {
@@ -52,5 +52,17 @@ abstract class ApiController extends Controller
 
         return $query;
     }
-}
 
+    /**
+     * Apply a resource-specific QueryFilter (search/filter/sort) to the query.
+     *
+     * Controllers call this once per index() so every list endpoint gets the
+     * same advanced filtering behaviour without duplicating ->when() chains.
+     *
+     * @param  class-string<QueryFilter>  $filterClass
+     */
+    protected function withFilters(Request $request, Builder $query, string $filterClass): Builder
+    {
+        return (new $filterClass($request))->apply($query);
+    }
+}

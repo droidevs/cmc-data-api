@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\Filiere\StoreFiliereRequest;
-use App\Http\Requests\Filiere\UpdateFiliereRequest;
+use App\Filters\FiliereFilter;
 use App\Http\Resources\FiliereResource;
 use App\Models\Filiere;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
+/**
+ * Filiere data is sourced entirely from AvancementProgramme.xlsx imports —
+ * no write endpoints are exposed here. Only index/show remain.
+ */
 class FiliereController extends ApiController
 {
     /** @var array<int, string> */
@@ -17,6 +19,7 @@ class FiliereController extends ApiController
     public function index(Request $request)
     {
         $query = Filiere::query()->orderBy('libelle');
+        $this->withFilters($request, $query, FiliereFilter::class);
         $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
 
         return FiliereResource::collection($this->paginate($request, $query));
@@ -28,28 +31,4 @@ class FiliereController extends ApiController
 
         return new FiliereResource($filiere);
     }
-
-    public function store(StoreFiliereRequest $request)
-    {
-        $filiere = Filiere::query()->create($request->validated());
-
-        return (new FiliereResource($filiere))
-            ->response()
-            ->setStatusCode(Response::HTTP_CREATED);
-    }
-
-    public function update(UpdateFiliereRequest $request, Filiere $filiere)
-    {
-        $filiere->update($request->validated());
-
-        return new FiliereResource($filiere);
-    }
-
-    public function destroy(Filiere $filiere)
-    {
-        $filiere->delete();
-
-        return response()->noContent();
-    }
 }
-

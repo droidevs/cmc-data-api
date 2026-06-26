@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\Pole\StorePoleRequest;
-use App\Http\Requests\Pole\UpdatePoleRequest;
+use App\Filters\PoleFilter;
 use App\Http\Resources\PoleResource;
 use App\Models\Pole;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
+/**
+ * Pole data is sourced entirely from Excel imports — no write endpoints
+ * are exposed here. Only index/show remain.
+ */
 class PoleController extends ApiController
 {
     /** @var array<int, string> */
@@ -17,6 +19,7 @@ class PoleController extends ApiController
     public function index(Request $request)
     {
         $query = Pole::query()->orderBy('id');
+        $this->withFilters($request, $query, PoleFilter::class);
         $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
 
         return PoleResource::collection($this->paginate($request, $query));
@@ -28,28 +31,4 @@ class PoleController extends ApiController
 
         return new PoleResource($pole);
     }
-
-    public function store(StorePoleRequest $request)
-    {
-        $pole = Pole::query()->create($request->validated());
-
-        return (new PoleResource($pole))
-            ->response()
-            ->setStatusCode(Response::HTTP_CREATED);
-    }
-
-    public function update(UpdatePoleRequest $request, Pole $pole)
-    {
-        $pole->update($request->validated());
-
-        return new PoleResource($pole);
-    }
-
-    public function destroy(Pole $pole)
-    {
-        $pole->delete();
-
-        return response()->noContent();
-    }
 }
-

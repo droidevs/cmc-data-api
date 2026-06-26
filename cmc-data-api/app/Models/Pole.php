@@ -1,13 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Pole extends Model
 {
     protected $fillable = ['libelle'];
+
+    // ─── Relationships ────────────────────────────────────────────────────────
 
     /** @return HasMany<Espace> */
     public function espaces(): HasMany
@@ -25,5 +30,12 @@ class Pole extends Model
     public function filieres(): HasMany
     {
         return $this->hasMany(Filiere::class);
+    }
+
+    // ─── Scopes ───────────────────────────────────────────────────────────────
+
+    public function scopeSearch(Builder $query, string $term): Builder
+    {
+        return $query->where('libelle', 'like', "%{$term}%");
     }
 }

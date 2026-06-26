@@ -14,12 +14,12 @@ use Illuminate\Contracts\Validation\ValidationRule;
  * set, caps the list length, and documents the exact accepted vocabulary
  * back to the API consumer via the 422 error message.
  */
-class CsvOfEnum implements ValidationRule
+readonly class CsvOfEnum implements ValidationRule
 {
     /** @param array<int, string> $allowed */
     public function __construct(
-        private readonly array $allowed,
-        private readonly int $max = 20,
+        private array $allowed,
+        private int   $max = 20,
     ) {
     }
 

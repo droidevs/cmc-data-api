@@ -15,11 +15,11 @@ use Illuminate\Contracts\Validation\ValidationRule;
  * client can't send a multi-megabyte query string or thousands of IN()
  * values.
  */
-class CsvOfStrings implements ValidationRule
+readonly class CsvOfStrings implements ValidationRule
 {
     public function __construct(
-        private readonly int $max = 50,
-        private readonly int $maxItemLength = 100,
+        private int $max = 50,
+        private int $maxItemLength = 100,
     ) {
     }
 

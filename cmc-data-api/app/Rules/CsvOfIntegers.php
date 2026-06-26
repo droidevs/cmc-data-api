@@ -16,9 +16,9 @@ use Illuminate\Contracts\Validation\ValidationRule;
  * comma-separated junk values (DoS via huge IN() clauses). This rule caps
  * count and enforces each element looks like a real ID.
  */
-class CsvOfIntegers implements ValidationRule
+readonly class CsvOfIntegers implements ValidationRule
 {
-    public function __construct(private readonly int $max = 100)
+    public function __construct(private int $max = 100)
     {
     }
 

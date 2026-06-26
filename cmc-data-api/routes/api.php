@@ -17,19 +17,60 @@ use App\Http\Controllers\Api\TypeFormationController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
-    Route::apiResource('poles', PoleController::class);
-    Route::apiResource('espaces', EspaceController::class);
-    Route::apiResource('formateurs', FormateurController::class)->parameters(['formateurs' => 'formateur']);
-    Route::apiResource('niveaux', NiveauController::class);
-    Route::apiResource('type-formations', TypeFormationController::class);
-    Route::apiResource('filieres', FiliereController::class)->parameters(['filieres' => 'filiere']);
-    Route::apiResource('annees', AnneeController::class);
-    Route::apiResource('groupes', GroupeController::class);
-    Route::apiResource('modules', ModuleController::class)->parameters(['modules' => 'module']);
-    Route::apiResource('affectations', AffectationController::class);
-    Route::apiResource('seances', SeanceController::class);
-    Route::apiResource('time-ranges', TimeRangeController::class);
-    Route::apiResource('stagiaires', StagiaireController::class)->parameters(['stagiaires' => 'stagiaire']);
-    Route::apiResource('notes', NoteController::class);
-});
 
+    // ─── Read-only reference / imported data ──────────────────────────────
+    // These controllers only implement index() and show(). Using apiResource()
+    // for them would register store/update/destroy routes that 404→500
+    // (method does not exist on the controller). Restrict to index/show.
+
+    Route::apiResource('poles', PoleController::class)
+        ->only(['index', 'show']);
+
+    Route::apiResource('espaces', EspaceController::class)
+        ->only(['index', 'show']);
+
+    Route::apiResource('formateurs', FormateurController::class)
+        ->parameters(['formateurs' => 'formateur'])
+        ->only(['index', 'show']);
+
+    Route::apiResource('niveaux', NiveauController::class)
+        ->only(['index', 'show']);
+
+    Route::apiResource('type-formations', TypeFormationController::class)
+        ->only(['index', 'show']);
+
+    Route::apiResource('filieres', FiliereController::class)
+        ->parameters(['filieres' => 'filiere'])
+        ->only(['index', 'show']);
+
+    Route::apiResource('annees', AnneeController::class)
+        ->only(['index', 'show']);
+
+    Route::apiResource('modules', ModuleController::class)
+        ->parameters(['modules' => 'module'])
+        ->only(['index', 'show']);
+
+    Route::apiResource('stagiaires', StagiaireController::class)
+        ->parameters(['stagiaires' => 'stagiaire'])
+        ->only(['index', 'show']);
+
+    Route::apiResource('time-ranges', TimeRangeController::class)
+        ->only(['index', 'show']);
+
+    // ─── Groupe ────────────────────────────────────────────────────────────
+    // NOTE: StoreGroupeRequest / UpdateGroupeRequest exist in the codebase but
+    // GroupeController currently has no store()/update()/destroy() methods.
+    // Restricted to index/show until those methods are implemented — see
+    // the flag below if write support is actually intended here.
+    Route::apiResource('groupes', GroupeController::class)
+        ->only(['index', 'show']);
+
+    // ─── Full CRUD — these controllers implement all 5 actions ────────────
+
+    Route::apiResource('affectations', AffectationController::class);
+
+    Route::apiResource('seances', SeanceController::class);
+
+    Route::apiResource('notes', NoteController::class);
+
+});

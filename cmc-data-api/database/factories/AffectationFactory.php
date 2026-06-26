@@ -2,66 +2,135 @@
 
 namespace Database\Factories;
 
-use App\Models\Affectation;
 use App\Models\Formateur;
 use App\Models\Groupe;
 use App\Models\Module;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/** @extends Factory<Affectation> */
+/**
+ * Affectation factory based on real data from AvancementProgramme2025.xlsx.
+ *
+ * Real MH Affectée Présentiel: range 15–105, mean ≈55, median 45.
+ * Real MH Affectée Sync:       range 0–30,   mean ≈13, median 15.
+ *
+ * Common hour pairs observed in real data:
+ *   (70, 15), (75, 25), (45, 20), (30, 10), (100, 20), (85, 25),
+ *   (15, 0), (40, 5), (72, 0), (80, 20), (105, 30)
+ *
+ * Some affectations have null formateur (module not yet assigned) — matches
+ * Excel rows where "Mle Affecté Présentiel Actif" is NaN.
+ *
+ * formateur_mle_syn is often the same as formateur_mle (same person delivers
+ * both in-person and online). Sometimes different, sometimes null.
+ *
+ * Mode: "Résidentiel" is the only value in the real dataset.
+ */
 class AffectationFactory extends Factory
 {
-    protected $model = Affectation::class;
-
-    public function configure(): static
-    {
-        return $this->afterMaking(function (Affectation $affectation) {
-            // no-op; place for future invariants
-        });
-    }
+    /**
+     * Realistic MH pairs (présentiel, sync) from real data.
+     * @var list<array{0: float, 1: float}>
+     */
+    private static array $mhPairs = [
+        [15.0,   0.0],
+        [30.0,  10.0],
+        [40.0,   5.0],
+        [45.0,  20.0],
+        [70.0,  15.0],
+        [72.0,   0.0],
+        [75.0,  25.0],
+        [80.0,  20.0],
+        [85.0,  25.0],
+        [100.0, 20.0],
+        [105.0, 30.0],
+        [22.5,   0.0],
+        [60.0,  15.0],
+        [90.0,  20.0],
+    ];
 
     public function definition(): array
     {
+        [$mhP, $mhS] = $this->faker->randomElement(self::$mhPairs);
+
+        // 15% of affectations have no formateur assigned yet (like real data NaN rows)
+        $hasFormateur = $this->faker->boolean(85);
+
+        $formateurMle    = null;
+        $formateurMleSyn = null;
+
+        if ($hasFormateur) {
+            $formateurMle = Formateur::factory();
+
+            // Syn trainer: 70% same person, 20% different person, 10% null
+            $synChoice = $this->faker->numberBetween(1, 10);
+            if ($synChoice <= 7) {
+                // Same formateur handles both presentiel and syn
+                $formateurMleSyn = $formateurMle;
+            } elseif ($synChoice <= 9) {
+                // Different formateur for syn sessions
+                $formateurMleSyn = Formateur::factory();
+            }
+            // else null — no syn trainer
+        }
+
         return [
-            'groupe_id' => Groupe::factory(),
-            'module_code' => Module::factory(),
-            'formateur_mle' => Formateur::factory(),
-            'mode' => $this->faker->randomElement(['presentiel', 'synchrone', 'async']),
-            'mh_affecte' => $this->faker->randomFloat(2, 10, 120),
+            'groupe_id'         => Groupe::factory(),
+            'module_code'       => Module::factory(),
+            'formateur_mle'     => $formateurMle,
+            'formateur_mle_syn' => $formateurMleSyn,
+            'mode'              => 'Résidentiel',   // only value in real data
+            'mh_affecte'        => $hasFormateur ? $mhP : null,
+            'mh_affecte_syn'    => $hasFormateur ? $mhS : null,
         ];
     }
 
-    public function presentiel(): static
+    /** State: assigned affectation (formateur set, hours set). */
+    public function assigned(): static
     {
-        return $this->state(fn () => ['mode' => 'presentiel']);
+        [$mhP, $mhS] = $this->faker->randomElement(self::$mhPairs);
+
+        return $this->state([
+            'formateur_mle'     => Formateur::factory()->ofppt(),
+            'formateur_mle_syn' => Formateur::factory()->ofppt(),
+            'mh_affecte'        => $mhP,
+            'mh_affecte_syn'    => $mhS,
+        ]);
     }
 
-    public function synchrone(): static
+    /** State: unassigned (pending) affectation — matches NaN rows in Excel. */
+    public function unassigned(): static
     {
-        return $this->state(fn () => ['mode' => 'synchrone']);
+        return $this->state([
+            'formateur_mle'     => null,
+            'formateur_mle_syn' => null,
+            'mh_affecte'        => null,
+            'mh_affecte_syn'    => null,
+        ]);
     }
 
-    public function async(): static
+    /** State: same formateur for both presentiel and syn (most common in real data). */
+    public function sameFormateur(): static
     {
-        return $this->state(fn () => ['mode' => 'async']);
+        [$mhP, $mhS] = $this->faker->randomElement(self::$mhPairs);
+        $mle = Formateur::factory()->ofppt();
+
+        return $this->state([
+            'formateur_mle'     => $mle,
+            'formateur_mle_syn' => $mle,
+            'mh_affecte'        => $mhP,
+            'mh_affecte_syn'    => $mhS,
+        ]);
     }
 
-    /**
-     * Ensure module.annee_id matches groupe.annee_id for coherent planning.
-     */
-    public function coherentAnnee(): static
+    /** State: no synchronous component (sync hours = 0, no syn trainer). */
+    public function presentielOnly(): static
     {
-        return $this->afterCreating(function (Affectation $affectation) {
-            // If module and groupe belong to different annees, regenerate module for groupe's annee.
-            $groupe = $affectation->groupe()->first();
-            $module = $affectation->module()->first();
+        $mhP = $this->faker->randomElement([30, 45, 70, 80, 100]);
 
-            if ($groupe && $module && $groupe->annee_id !== $module->annee_id) {
-                $newModule = Module::factory()->create(['annee_id' => $groupe->annee_id]);
-                $affectation->updateQuietly(['module_code' => $newModule->getKey()]);
-            }
-        });
+        return $this->state([
+            'formateur_mle_syn' => null,
+            'mh_affecte'        => (float) $mhP,
+            'mh_affecte_syn'    => 0.0,
+        ]);
     }
 }
-
-

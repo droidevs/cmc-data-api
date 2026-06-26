@@ -2,24 +2,31 @@
 
 namespace Database\Factories;
 
-use App\Models\TypeFormation;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/** @extends Factory<TypeFormation> */
+/**
+ * TypeFormation represents the OFPPT programme type.
+ * The only type observed in Excel data is "Diplômante".
+ * Other valid OFPPT types are included for completeness.
+ */
 class TypeFormationFactory extends Factory
 {
-    protected $model = TypeFormation::class;
-
     public function definition(): array
     {
+        static $types = [
+            'Diplômante',    // Only type in real Excel data
+            'Qualifiante',
+            'Certificante',
+        ];
+
         return [
-            'libelle' => $this->faker->unique()->randomElement([
-                'Initial',
-                'Continuing',
-                'Apprenticeship',
-                'Evening',
-            ]),
+            'libelle' => $this->faker->randomElement($types),
         ];
     }
-}
 
+    /** State: Diplômante (matches all real data from AvancementProgramme). */
+    public function diplomante(): static
+    {
+        return $this->state(['libelle' => 'Diplômante']);
+    }
+}

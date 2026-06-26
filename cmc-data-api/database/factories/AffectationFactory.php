@@ -23,7 +23,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  * formateur_mle_syn is often the same as formateur_mle (same person delivers
  * both in-person and online). Sometimes different, sometimes null.
  *
- * Mode: "Résidentiel" is the only value in the real dataset.
+ * Mode: real dataset only ever contains "Résidentiel" / "Alternance" — the
+ * model never has a "synchrone"/"async" mode (that distinction lives at the
+ * hours level via mh_affecte vs mh_affecte_syn, not on `mode` itself).
  */
 class AffectationFactory extends Factory
 {
@@ -132,5 +134,59 @@ class AffectationFactory extends Factory
             'mh_affecte'        => (float) $mhP,
             'mh_affecte_syn'    => 0.0,
         ]);
+    }
+
+    /**
+     * State: keeps groupe_id / module_code coherent by picking a Module that
+     * actually belongs to the same Annee as the Groupe being affected.
+     *
+     * Without this, the default factory wires a brand-new random Groupe and
+     * a brand-new random Module independently, which can pair a 1ère année
+     * groupe with a 2ème année module (or one from an unrelated filiere) —
+     * a data-integrity break the real dataset never has, since a module is
+     * only ever taught to groups of its own Annee.
+     *
+     * IMPORTANT (Laravel factory state ordering): arguments passed to the
+     * final ->create([...]) call are merged in *after* all ->state(...)
+     * closures run, so a state closure can never see a groupe_id supplied
+     * via ->create(). To pin a specific Groupe, pass it via ->state(...)
+     * (or pass the model in) BEFORE calling coherentAnnee():
+     *
+     *   Affectation::factory()
+     *       ->state(['groupe_id' => $groupe->id])
+     *       ->coherentAnnee()
+     *       ->create(['formateur_mle' => $formateur->mle]);
+     *
+     * If no groupe_id has been pinned yet, this picks one fresh Annee and
+     * derives both a coherent Groupe and Module from it.
+     */
+    public function coherentAnnee(): static
+    {
+        return $this->state(function (array $attributes) {
+            $groupeId = $attributes['groupe_id'] ?? null;
+
+            $anneeId = null;
+            if ($groupeId instanceof Groupe) {
+                $anneeId = $groupeId->annee_id;
+            } elseif (is_int($groupeId) || is_string($groupeId)) {
+                $anneeId = Groupe::query()->find($groupeId)?->annee_id;
+            }
+            // If groupeId is a Factory instance (still unresolved) or null,
+            // we can't introspect it yet — fall through to the fresh-annee path.
+
+            if (! $anneeId) {
+                $annee = \App\Models\Annee::factory()->create();
+                $anneeId = $annee->id;
+
+                return [
+                    'groupe_id'   => Groupe::factory()->state(['annee_id' => $anneeId]),
+                    'module_code' => Module::factory()->state(['annee_id' => $anneeId]),
+                ];
+            }
+
+            return [
+                'module_code' => Module::factory()->state(['annee_id' => $anneeId]),
+            ];
+        });
     }
 }

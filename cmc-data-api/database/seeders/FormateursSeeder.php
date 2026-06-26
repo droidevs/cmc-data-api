@@ -10,12 +10,20 @@ use Illuminate\Database\Seeder;
  * Seeds all 32 real formateurs from Base_Formateurs.xlsx.
  *
  * Key design decisions:
- *   - pole_id is resolved by matching "Affectation" column to our pole libelles
- *   - efp_mutualise is set for trainers who teach outside their home pole
- *   - All have statut = 'OFPPT' (only status in the real data)
- *   - MHS = 26 for all (standard OFPPT monthly hours)
- *   - Two extra formateurs found in AvancementProgramme but not in Base_Formateurs
- *     (H418299, I661572) are added as Vacataire with minimal data
+ *   - pole_id is resolved by an EXACT match against Pole.libelle (the
+ *     'pole' / 'efp_mutualise' keys below are written to match
+ *     ReferenceSeeder's libelles verbatim). The previous version used
+ *     fuzzy str_contains() matching in both directions plus a suffix
+ *     heuristic, which could silently resolve a formateur to the wrong
+ *     pole — a real risk for a foreign key.
+ *   - Attribute defaults (anything the spreadsheet doesn't dictate) come
+ *     from FormateurFactory's ofppt()/vacataire() states, then the real,
+ *     known values from self::FORMATEURS are overlaid on top. Real data
+ *     always wins; the factory only fills gaps and keeps the shape
+ *     consistent with every other Formateur created elsewhere in the app.
+ *   - All real-data trainers have statut = 'OFPPT' except the two
+ *     Vacataire fallbacks (H418299, I661572) found only in
+ *     AvancementProgramme but absent from Base_Formateurs.
  */
 class FormateursSeeder extends Seeder
 {
@@ -24,8 +32,7 @@ class FormateursSeeder extends Seeder
      *
      * Format: mle => [nom_prenom, statut, affectation_pole, efp_mutualise_pole, mutualise, mhs, email_edu]
      *
-     * affectation_pole: short key matching our Pole.libelle prefixes
-     * efp_mutualise_pole: where they actually teach (if mutualisé)
+     * pole / efp_mutualise: must match a Pole.libelle exactly (see ReferenceSeeder).
      */
     private const FORMATEURS = [
         // ── Mutualised from Pôle Gestion et Commerce → Pôle Digital ─────────
@@ -343,57 +350,54 @@ class FormateursSeeder extends Seeder
 
     public function run(): void
     {
-        // Pre-load poles so we don't hit the DB in every loop iteration
+        // Pre-load poles for exact lookup (must match ReferenceSeeder's libelles).
         $poles = Pole::all()->keyBy(fn ($p) => $p->libelle);
 
+        $inserted = 0;
+        $skipped  = 0;
+
         foreach (self::FORMATEURS as $mle => $data) {
-            // Resolve home pole
-            $pole = null;
-            foreach ($poles as $libelle => $model) {
-                if (str_contains($libelle, $data['pole']) || str_contains($data['pole'], $libelle)) {
-                    $pole = $model;
-                    break;
-                }
-                // Exact suffix match
-                if (str_ends_with($libelle, substr($data['pole'], strpos($data['pole'], 'Pôle')))) {
-                    $pole = $model;
-                    break;
-                }
-            }
-
-            // Fallback: partial search
-            if (! $pole) {
-                $keyword = str_replace('Pôle ', '', $data['pole']);
-                $keyword = explode(' ', $keyword)[0]; // e.g. "Gestion" or "Digital"
-                $pole = $poles->first(fn ($p) => str_contains($p->libelle, $keyword));
-            }
+            $pole = $poles->get($data['pole']);
 
             if (! $pole) {
-                $this->command?->warn("Pole not found for formateur {$mle}: {$data['pole']}");
+                $this->command?->warn("Pole not found for formateur {$mle}: {$data['pole']} (run ReferenceSeeder first)");
+                $skipped++;
                 continue;
             }
 
-            // Resolve efp_mutualise pole id
             $efpMutualiseId = null;
             if ($data['efp_mutualise']) {
-                $efpKeyword    = str_replace('Pôle ', '', $data['efp_mutualise']);
-                $efpKeyword    = explode(' ', $efpKeyword)[0];
-                $efpPole       = $poles->first(fn ($p) => str_contains($p->libelle, $efpKeyword));
-                $efpMutualiseId = $efpPole?->id;
+                $efpPole = $poles->get($data['efp_mutualise']);
+                if (! $efpPole) {
+                    $this->command?->warn("EFP mutualisé pole not found for formateur {$mle}: {$data['efp_mutualise']}");
+                } else {
+                    $efpMutualiseId = $efpPole->id;
+                }
             }
 
-            Formateur::firstOrCreate(
-                ['mle' => (string) $mle],
-                [
-                    'pole_id'       => $pole->id,
-                    'nom_prenom'    => $data['nom_prenom'],
-                    'statut'        => $data['statut'],
-                    'email_edu'     => $data['email_edu'],
-                    'mhs'           => $data['mhs'],
-                    'efp_mutualise' => $efpMutualiseId,
-                    'mutualise'     => $data['mutualise'],
-                ]
-            );
+            // Base shape/defaults from the factory's matching state, then overlay
+            // the real known values — real data always wins.
+            $base = $data['statut'] === 'OFPPT'
+                ? \App\Models\Formateur::factory()->ofppt()->makeOne()->toArray()
+                : \App\Models\Formateur::factory()->vacataire()->makeOne()->toArray();
+
+            unset($base['mle']); // PK is the array key, not factory-generated
+
+            $attributes = array_merge($base, [
+                'pole_id'       => $pole->id,
+                'nom_prenom'    => $data['nom_prenom'],
+                'statut'        => $data['statut'],
+                'email_edu'     => $data['email_edu'],
+                'mhs'           => $data['mhs'],
+                'efp_mutualise' => $efpMutualiseId,
+                'mutualise'     => $data['mutualise'],
+            ]);
+
+            Formateur::firstOrCreate(['mle' => (string) $mle], $attributes);
+
+            $inserted++;
         }
+
+        $this->command?->info("FormateursSeeder: {$inserted} inserted, {$skipped} skipped.");
     }
 }

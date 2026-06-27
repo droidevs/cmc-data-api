@@ -2,34 +2,29 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Filters\PoleFilter;
 use App\Http\Requests\Filters\PoleFilterRequest;
 use App\Http\Resources\PoleResource;
 use App\Models\Pole;
+use App\Services\PoleService;
 use Illuminate\Http\Request;
 
 /**
- * Pole data is sourced entirely from Excel imports — no write endpoints
- * are exposed here. Only index/show remain.
+ * Pole data is sourced entirely from Excel imports — no write endpoints.
+ * Delegates all query logic to PoleService (shared with WebController).
  */
-class PoleController extends ApiController
+class PoleController
 {
-    /** @var array<int, string> */
-    private array $allowedIncludes = ['espaces', 'formateurs', 'filieres'];
+    public function __construct(private PoleService $service) {}
 
     public function index(PoleFilterRequest $request)
     {
-        $query = Pole::query()->orderBy('id');
-        $this->withFilters($request, $query, PoleFilter::class);
-        $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
+        ['items' => $items] = $this->service->list($request);
 
-        return PoleResource::collection($this->paginate($request, $query));
+        return PoleResource::collection($items);
     }
 
     public function show(Request $request, Pole $pole)
     {
-        $pole->load($this->requestedIncludes($request, $this->allowedIncludes));
-
-        return new PoleResource($pole);
+        return new PoleResource($this->service->find($request, $pole));
     }
 }

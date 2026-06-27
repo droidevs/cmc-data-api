@@ -2,70 +2,46 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Filters\AffectationFilter;
 use App\Http\Requests\Affectation\StoreAffectationRequest;
 use App\Http\Requests\Affectation\UpdateAffectationRequest;
-use App\Http\Requests\Filters\AffectationFilterRequest;
 use App\Http\Resources\AffectationResource;
 use App\Models\Affectation;
+use App\Services\AffectationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class AffectationController extends ApiController
+class AffectationController
 {
-    /** @var array<int, string> */
-    private array $allowedIncludes = [
-        'groupe',
-        'module',
-        'formateur',
-        'formateurSyn',
-        'seances',
-        'seances.timeRange',
-        'seances.espace',
-        'groupe.annee',
-        'groupe.annee.filiere',
-    ];
+    public function __construct(private AffectationService $service) {}
 
-    public function index(AffectationFilterRequest $request)
+    public function index(Request $request)
     {
-        $query = Affectation::query()->orderBy('id');
-        $query->with(['groupe', 'module', 'formateur']);
-        $this->withFilters($request, $query, AffectationFilter::class);
-        $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
-
-        return AffectationResource::collection($this->paginate($request, $query));
+        ['items' => $items] = $this->service->list($request);
+        return AffectationResource::collection($items);
     }
 
     public function show(Request $request, Affectation $affectation)
     {
-        $affectation->load(array_values(array_unique(array_merge(
-            ['groupe', 'module', 'formateur'],
-            $this->requestedIncludes($request, $this->allowedIncludes)
-        ))));
-
-        return new AffectationResource($affectation);
+        return new AffectationResource($this->service->find($request, $affectation));
     }
 
     public function store(StoreAffectationRequest $request)
     {
-        $affectation = Affectation::query()->create($request->validated());
+        $affectation = $this->service->create($request->validated());
 
-        return (new AffectationResource($affectation->load(['groupe', 'module', 'formateur'])))
+        return (new AffectationResource($affectation))
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
     public function update(UpdateAffectationRequest $request, Affectation $affectation)
     {
-        $affectation->update($request->validated());
-
-        return new AffectationResource($affectation->load(['groupe', 'module', 'formateur']));
+        return new AffectationResource($this->service->update($affectation, $request->validated()));
     }
 
     public function destroy(Affectation $affectation)
     {
-        $affectation->delete();
-
+        $this->service->delete($affectation);
         return response()->noContent();
     }
 }

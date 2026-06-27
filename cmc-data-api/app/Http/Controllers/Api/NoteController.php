@@ -2,68 +2,46 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Filters\NoteFilter;
-use App\Http\Requests\Filters\NoteFilterRequest;
 use App\Http\Requests\Note\StoreNoteRequest;
 use App\Http\Requests\Note\UpdateNoteRequest;
 use App\Http\Resources\NoteResource;
 use App\Models\Note;
+use App\Services\NoteService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class NoteController extends ApiController
+class NoteController
 {
-    /** @var array<int, string> */
-    private array $allowedIncludes = [
-        'seance',
-        'seance.affectation',
-        'seance.affectation.module',
-        'seance.affectation.groupe',
-        'seance.timeRange',
-        'stagiaire',
-        'stagiaire.groupe',
-    ];
+    public function __construct(private NoteService $service) {}
 
-    public function index(NoteFilterRequest $request)
+    public function index(Request $request)
     {
-        $query = Note::query()->orderBy('id');
-        $query->with(['seance', 'stagiaire']);
-        $this->withFilters($request, $query, NoteFilter::class);
-        $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
-
-        return NoteResource::collection($this->paginate($request, $query));
+        ['items' => $items] = $this->service->list($request);
+        return NoteResource::collection($items);
     }
 
     public function show(Request $request, Note $note)
     {
-        $note->load(array_values(array_unique(array_merge(
-            ['seance', 'stagiaire'],
-            $this->requestedIncludes($request, $this->allowedIncludes)
-        ))));
-
-        return new NoteResource($note);
+        return new NoteResource($this->service->find($request, $note));
     }
 
     public function store(StoreNoteRequest $request)
     {
-        $note = Note::query()->create($request->validated());
+        $note = $this->service->create($request->validated());
 
-        return (new NoteResource($note->load(['seance', 'stagiaire'])))
+        return (new NoteResource($note))
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
     public function update(UpdateNoteRequest $request, Note $note)
     {
-        $note->update($request->validated());
-
-        return new NoteResource($note->load(['seance', 'stagiaire']));
+        return new NoteResource($this->service->update($note, $request->validated()));
     }
 
     public function destroy(Note $note)
     {
-        $note->delete();
-
+        $this->service->delete($note);
         return response()->noContent();
     }
 }

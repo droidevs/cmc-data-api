@@ -2,70 +2,47 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Filters\SeanceFilter;
-use App\Http\Requests\Filters\SeanceFilterRequest;
 use App\Http\Requests\Seance\StoreSeanceRequest;
 use App\Http\Requests\Seance\UpdateSeanceRequest;
 use App\Http\Resources\SeanceResource;
 use App\Models\Seance;
+use App\Services\SeanceService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class SeanceController extends ApiController
+class SeanceController
 {
-    /** @var array<int, string> */
-    private array $allowedIncludes = [
-        'affectation',
-        'affectation.groupe',
-        'affectation.module',
-        'affectation.formateur',
-        'timeRange',
-        'espace',
-        'espace.pole',
-        'notes',
-        'notes.stagiaire',
-    ];
+    public function __construct(private SeanceService $service) {}
 
-    public function index(SeanceFilterRequest $request)
+    public function index(Request $request)
     {
-        $query = Seance::query()->orderBy('date')->orderBy('time_range_id');
-        $query->with(['affectation', 'timeRange']);
-        $this->withFilters($request, $query, SeanceFilter::class);
-        $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
-
-        return SeanceResource::collection($this->paginate($request, $query));
+        ['items' => $items] = $this->service->list($request);
+        return SeanceResource::collection($items);
     }
 
     public function show(Request $request, Seance $seance)
     {
-        $seance->load(array_values(array_unique(array_merge(
-            ['affectation', 'timeRange'],
-            $this->requestedIncludes($request, $this->allowedIncludes)
-        ))));
-
-        return new SeanceResource($seance);
+        return new SeanceResource($this->service->find($request, $seance));
     }
 
     public function store(StoreSeanceRequest $request)
     {
-        $seance = Seance::query()->create($request->validated());
+        $seance = $this->service->create($request->validated());
 
-        return (new SeanceResource($seance->load(['affectation', 'timeRange', 'espace'])))
+        return (new SeanceResource($seance))
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
     public function update(UpdateSeanceRequest $request, Seance $seance)
     {
-        $seance->update($request->validated());
-
-        return new SeanceResource($seance->load(['affectation', 'timeRange', 'espace']));
+        $this->service->update($seance, $request->validated());
+        return new SeanceResource($seance);
     }
 
     public function destroy(Seance $seance)
     {
-        $seance->delete();
-
+        $this->service->delete($seance);
         return response()->noContent();
     }
 }

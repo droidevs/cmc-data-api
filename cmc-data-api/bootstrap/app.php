@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\AuditRequests;
+use App\Http\Middleware\CacheDataResponses;
 use App\Http\Middleware\RejectSuspiciousCrossSiteRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -31,7 +32,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->throttleApi('api');
         $middleware->api(prepend: RejectSuspiciousCrossSiteRequests::class);
+        $middleware->api(append: CacheDataResponses::class);
         $middleware->web(append: 'throttle:web');
+        $middleware->web(append: CacheDataResponses::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (OriginMismatchException $exception, Request $request) {

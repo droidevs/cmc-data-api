@@ -2,34 +2,29 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Filters\FiliereFilter;
 use App\Http\Requests\Filters\FiliereFilterRequest;
 use App\Http\Resources\FiliereResource;
 use App\Models\Filiere;
+use App\Services\FiliereService;
 use Illuminate\Http\Request;
 
 /**
- * Filiere data is sourced entirely from AvancementProgramme.xlsx imports —
- * no write endpoints are exposed here. Only index/show remain.
+ * Filiere data is sourced from AvancementProgramme.xlsx — read-only (index + show).
+ * Delegates to FiliereService.
  */
-class FiliereController extends ApiController
+class FiliereController
 {
-    /** @var array<int, string> */
-    private array $allowedIncludes = ['pole', 'niveau', 'typeFormation', 'annees'];
+    public function __construct(private FiliereService $service) {}
 
     public function index(FiliereFilterRequest $request)
     {
-        $query = Filiere::query()->orderBy('libelle');
-        $this->withFilters($request, $query, FiliereFilter::class);
-        $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
+        ['items' => $items] = $this->service->list($request);
 
-        return FiliereResource::collection($this->paginate($request, $query));
+        return FiliereResource::collection($items);
     }
 
     public function show(Request $request, Filiere $filiere)
     {
-        $filiere->load($this->requestedIncludes($request, $this->allowedIncludes));
-
-        return new FiliereResource($filiere);
+        return new FiliereResource($this->service->find($request, $filiere));
     }
 }

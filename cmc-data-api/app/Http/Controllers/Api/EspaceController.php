@@ -2,34 +2,29 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Filters\EspaceFilter;
 use App\Http\Requests\Filters\EspaceFilterRequest;
 use App\Http\Resources\EspaceResource;
 use App\Models\Espace;
+use App\Services\EspaceService;
 use Illuminate\Http\Request;
 
 /**
- * Espace data is sourced entirely from Excel imports — no write endpoints
- * are exposed here. Only index/show remain.
+ * Espace data is sourced entirely from Excel imports — read-only (index + show).
+ * Delegates all query logic to EspaceService (shared with any future WebController).
  */
-class EspaceController extends ApiController
+class EspaceController
 {
-    /** @var array<int, string> */
-    private array $allowedIncludes = ['pole', 'seances'];
+    public function __construct(private EspaceService $service) {}
 
     public function index(EspaceFilterRequest $request)
     {
-        $query = Espace::query()->orderBy('id');
-        $this->withFilters($request, $query, EspaceFilter::class);
-        $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
+        ['items' => $items] = $this->service->list($request);
 
-        return EspaceResource::collection($this->paginate($request, $query));
+        return EspaceResource::collection($items);
     }
 
     public function show(Request $request, Espace $espace)
     {
-        $espace->load($this->requestedIncludes($request, $this->allowedIncludes));
-
-        return new EspaceResource($espace);
+        return new EspaceResource($this->service->find($request, $espace));
     }
 }

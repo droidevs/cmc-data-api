@@ -2,34 +2,29 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Filters\AnneeFilter;
 use App\Http\Requests\Filters\AnneeFilterRequest;
 use App\Http\Resources\AnneeResource;
 use App\Models\Annee;
+use App\Services\AnneeService;
 use Illuminate\Http\Request;
 
 /**
- * Annee data is sourced entirely from AvancementProgramme.xlsx imports —
- * no write endpoints are exposed here. Only index/show remain.
+ * Annee data is sourced from AvancementProgramme.xlsx — read-only (index + show).
+ * Delegates to AnneeService.
  */
-class AnneeController extends ApiController
+class AnneeController
 {
-    /** @var array<int, string> */
-    private array $allowedIncludes = ['filiere', 'groupes', 'modules'];
+    public function __construct(private AnneeService $service) {}
 
     public function index(AnneeFilterRequest $request)
     {
-        $query = Annee::query()->orderBy('id');
-        $this->withFilters($request, $query, AnneeFilter::class);
-        $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
+        ['items' => $items] = $this->service->list($request);
 
-        return AnneeResource::collection($this->paginate($request, $query));
+        return AnneeResource::collection($items);
     }
 
     public function show(Request $request, Annee $annee)
     {
-        $annee->load($this->requestedIncludes($request, $this->allowedIncludes));
-
-        return new AnneeResource($annee);
+        return new AnneeResource($this->service->find($request, $annee));
     }
 }

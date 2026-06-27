@@ -2,34 +2,29 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Filters\NiveauFilter;
 use App\Http\Requests\Filters\NiveauFilterRequest;
 use App\Http\Resources\NiveauResource;
 use App\Models\Niveau;
+use App\Services\NiveauService;
 use Illuminate\Http\Request;
 
 /**
- * Niveau is a small reference table sourced from Excel imports —
- * no write endpoints are exposed here. Only index/show remain.
+ * Niveau is a small reference table — read-only (index + show).
+ * Delegates to NiveauService.
  */
-class NiveauController extends ApiController
+class NiveauController
 {
-    /** @var array<int, string> */
-    private array $allowedIncludes = ['filieres'];
+    public function __construct(private NiveauService $service) {}
 
     public function index(NiveauFilterRequest $request)
     {
-        $query = Niveau::query()->orderBy('id');
-        $this->withFilters($request, $query, NiveauFilter::class);
-        $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
+        ['items' => $items] = $this->service->list($request);
 
-        return NiveauResource::collection($this->paginate($request, $query));
+        return NiveauResource::collection($items);
     }
 
     public function show(Request $request, Niveau $niveau)
     {
-        $niveau->load($this->requestedIncludes($request, $this->allowedIncludes));
-
-        return new NiveauResource($niveau);
+        return new NiveauResource($this->service->find($request, $niveau));
     }
 }

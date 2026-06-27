@@ -2,33 +2,33 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Filters\GroupeFilter;
 use App\Http\Requests\Filters\GroupeFilterRequest;
-use App\Http\Requests\Groupe\StoreGroupeRequest;
-use App\Http\Requests\Groupe\UpdateGroupeRequest;
 use App\Http\Resources\GroupeResource;
 use App\Models\Groupe;
+use App\Services\GroupeService;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
-class GroupeController extends ApiController
+/**
+ * Groupe data is sourced from AvancementProgramme.xlsx — read-only (index + show).
+ * Delegates to GroupeService.
+ *
+ * Note: StoreGroupeRequest / UpdateGroupeRequest exist in the codebase but the
+ * architectural contract designates Groupe as read-only (Excel-sourced), so write
+ * endpoints are intentionally not exposed here.
+ */
+class GroupeController
 {
-    /** @var array<int, string> */
-    private array $allowedIncludes = ['annee', 'stagiaires', 'affectations'];
+    public function __construct(private GroupeService $service) {}
 
     public function index(GroupeFilterRequest $request)
     {
-        $query = Groupe::query()->orderBy('id');
-        $this->withFilters($request, $query, GroupeFilter::class);
-        $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
+        ['items' => $items] = $this->service->list($request);
 
-        return GroupeResource::collection($this->paginate($request, $query));
+        return GroupeResource::collection($items);
     }
 
     public function show(Request $request, Groupe $groupe)
     {
-        $groupe->load($this->requestedIncludes($request, $this->allowedIncludes));
-
-        return new GroupeResource($groupe);
+        return new GroupeResource($this->service->find($request, $groupe));
     }
 }

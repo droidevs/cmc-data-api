@@ -2,40 +2,29 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Filters\ModuleFilter;
 use App\Http\Requests\Filters\ModuleFilterRequest;
 use App\Http\Resources\ModuleResource;
 use App\Models\Module;
+use App\Services\ModuleService;
 use Illuminate\Http\Request;
 
 /**
- * Module data is sourced from AvancementProgramme.xlsx imports —
- * no write endpoints are exposed here. Only index/show remain.
+ * Module data is sourced from AvancementProgramme.xlsx — read-only (index + show).
+ * Delegates all query logic to ModuleService.
  */
-class ModuleController extends ApiController
+class ModuleController
 {
-    /** @var array<int, string> */
-    private array $allowedIncludes = [
-        'annee',
-        'annee.filiere',
-        'affectations',
-        'affectations.groupe',
-        'affectations.formateur',
-    ];
+    public function __construct(private ModuleService $service) {}
 
     public function index(ModuleFilterRequest $request)
     {
-        $query = Module::query()->orderBy('libelle');
-        $this->withFilters($request, $query, ModuleFilter::class);
-        $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
+        ['items' => $items] = $this->service->list($request);
 
-        return ModuleResource::collection($this->paginate($request, $query));
+        return ModuleResource::collection($items);
     }
 
     public function show(Request $request, Module $module)
     {
-        $module->load($this->requestedIncludes($request, $this->allowedIncludes));
-
-        return new ModuleResource($module);
+        return new ModuleResource($this->service->find($request, $module));
     }
 }

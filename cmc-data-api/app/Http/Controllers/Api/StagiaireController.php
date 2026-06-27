@@ -2,43 +2,29 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Filters\StagiaireFilter;
 use App\Http\Requests\Filters\StagiaireFilterRequest;
 use App\Http\Resources\StagiaireResource;
 use App\Models\Stagiaire;
+use App\Services\StagiaireService;
 use Illuminate\Http\Request;
 
 /**
- * Stagiaire data is sourced from lister_minimized.xlsx and
- * BasePlateEvaluation.xlsx imports — no write endpoints here.
- * Only index/show remain.
+ * Stagiaire data is sourced from lister_minimized.xlsx / BasePlateEvaluation.xlsx.
+ * Read-only (index + show). Delegates to StagiaireService.
  */
-class StagiaireController extends ApiController
+class StagiaireController
 {
-    /** @var array<int, string> */
-    private array $allowedIncludes = [
-        'groupe',
-        'groupe.annee',
-        'groupe.annee.filiere',
-        'notes',
-        'notes.seance',
-        'notes.seance.affectation',
-        'notes.seance.affectation.module',
-    ];
+    public function __construct(private StagiaireService $service) {}
 
     public function index(StagiaireFilterRequest $request)
     {
-        $query = Stagiaire::query()->orderBy('nom')->orderBy('prenom');
-        $this->withFilters($request, $query, StagiaireFilter::class);
-        $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
+        ['items' => $items] = $this->service->list($request);
 
-        return StagiaireResource::collection($this->paginate($request, $query));
+        return StagiaireResource::collection($items);
     }
 
     public function show(Request $request, Stagiaire $stagiaire)
     {
-        $stagiaire->load($this->requestedIncludes($request, $this->allowedIncludes));
-
-        return new StagiaireResource($stagiaire);
+        return new StagiaireResource($this->service->find($request, $stagiaire));
     }
 }

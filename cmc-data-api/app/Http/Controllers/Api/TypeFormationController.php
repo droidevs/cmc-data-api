@@ -2,34 +2,29 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Filters\TypeFormationFilter;
 use App\Http\Requests\Filters\TypeFormationFilterRequest;
 use App\Http\Resources\TypeFormationResource;
 use App\Models\TypeFormation;
+use App\Services\TypeFormationService;
 use Illuminate\Http\Request;
 
 /**
- * TypeFormation is a small reference table sourced from Excel imports —
- * no write endpoints are exposed here. Only index/show remain.
+ * TypeFormation is a small reference table — read-only (index + show).
+ * Delegates to TypeFormationService.
  */
-class TypeFormationController extends ApiController
+class TypeFormationController
 {
-    /** @var array<int, string> */
-    private array $allowedIncludes = ['filieres'];
+    public function __construct(private TypeFormationService $service) {}
 
     public function index(TypeFormationFilterRequest $request)
     {
-        $query = TypeFormation::query()->orderBy('id');
-        $this->withFilters($request, $query, TypeFormationFilter::class);
-        $this->withRequestedIncludes($request, $query, $this->allowedIncludes);
+        ['items' => $items] = $this->service->list($request);
 
-        return TypeFormationResource::collection($this->paginate($request, $query));
+        return TypeFormationResource::collection($items);
     }
 
     public function show(Request $request, TypeFormation $typeFormation)
     {
-        $typeFormation->load($this->requestedIncludes($request, $this->allowedIncludes));
-
-        return new TypeFormationResource($typeFormation);
+        return new TypeFormationResource($this->service->find($request, $typeFormation));
     }
 }

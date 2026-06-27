@@ -38,6 +38,11 @@ abstract class QueryFilter
      */
     abstract protected function filters(): array;
 
+    public static function filterKeys(): array
+    {
+        return array_keys((new static)->filters());
+    }
+
     public function apply(Builder $builder): Builder
     {
         $this->builder = $builder;

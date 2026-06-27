@@ -14,7 +14,8 @@ class FormateurService extends BaseService
 
     protected function defaultWith(): array
     {
-        return ['poles'];
+        // 'pole' (singular) — Formateur::pole() is a BelongsTo, not 'poles'
+        return ['pole'];
     }
 
     protected function defaultShowWith(): array

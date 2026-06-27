@@ -3,6 +3,7 @@
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
+use Monolog\Formatter\JsonFormatter;
 use Monolog\Processor\PsrLogMessageProcessor;
 
 return [
@@ -70,6 +71,15 @@ return [
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
+        'audit' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/audit.log'),
+            'level' => env('AUDIT_LOG_LEVEL', 'info'),
+            'days' => env('AUDIT_LOG_DAYS', 90),
+            'formatter' => JsonFormatter::class,
             'replace_placeholders' => true,
         ],
 

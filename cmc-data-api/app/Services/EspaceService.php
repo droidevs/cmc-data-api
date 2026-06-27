@@ -31,4 +31,30 @@ class EspaceService extends BaseService
     {
         return Espace::query()->orderBy('id');
     }
+
+    /**
+     * Create a new espace (used by Web write controller).
+     */
+    public function create(array $validated): Espace
+    {
+        $espace = Espace::create($validated);
+        return $espace->load(['pole']);
+    }
+
+    /**
+     * Update an existing espace.
+     */
+    public function update(Espace $espace, array $validated): Espace
+    {
+        $espace->update($validated);
+        return $espace->load(['pole']);
+    }
+
+    /**
+     * Delete an espace.
+     */
+    public function delete(Espace $espace): void
+    {
+        $espace->delete();
+    }
 }

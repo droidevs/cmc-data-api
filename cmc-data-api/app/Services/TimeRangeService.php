@@ -31,4 +31,29 @@ class TimeRangeService extends BaseService
     {
         return TimeRange::query()->orderBy('start_time');
     }
+
+    /**
+     * Create a new time range (used by Web write controller).
+     */
+    public function create(array $validated): TimeRange
+    {
+        return TimeRange::create($validated);
+    }
+
+    /**
+     * Update an existing time range.
+     */
+    public function update(TimeRange $timeRange, array $validated): TimeRange
+    {
+        $timeRange->update($validated);
+        return $timeRange;
+    }
+
+    /**
+     * Delete a time range.
+     */
+    public function delete(TimeRange $timeRange): void
+    {
+        $timeRange->delete();
+    }
 }

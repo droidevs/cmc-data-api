@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\SeanceType;
 use App\Models\Note;
 use App\Models\Seance;
 use Illuminate\Database\Seeder;
@@ -26,7 +27,10 @@ use Illuminate\Support\Carbon;
 class EvaluationSeeder extends Seeder
 {
     /** Seance types that actually carry a grade. */
-    private const EVALUABLE_TYPES = ['cc', 'efm', 'exam'];
+    private const EVALUABLE_TYPES = [
+        SeanceType::CC->value,
+        SeanceType::EFM->value,
+    ];
 
     public function run(): void
     {

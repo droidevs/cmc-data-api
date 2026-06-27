@@ -18,7 +18,7 @@ return new class extends Migration
             // a "synchrone" (online) seance has no physical room.
             $table->foreignId('espace_id')->nullable()->constrained('espaces')->nullOnDelete();
 
-            $table->string('type', 32)->default('cours');
+            $table->enum("type", (array) \App\Enums\SeanceType::class)->default('COURS');
             $table->date('date')->index();
             $table->foreignId('time_range_id')->constrained('time_ranges')->restrictOnDelete();
             $table->timestamps();

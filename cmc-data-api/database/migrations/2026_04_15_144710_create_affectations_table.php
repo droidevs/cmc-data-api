@@ -20,7 +20,11 @@ return new class extends Migration
 
             $table->string('formateur_mle', 32);
             $table->string('formateur_mle_syn', 32)->nullable();
-            $table->string('mode', 32)->default('presentiel');
+            $table->enum(
+                'mode',
+                array_column(\App\Enums\AffectationMode::cases(), 'value')
+            )->default(\App\Enums\AffectationMode::PRESENTIEL->value);
+
             $table->decimal('mh_affecte', 8, 2)->default(0);
             $table->decimal('mh_affecte_syn', 8, 2)->default(0);
             $table->timestamps();

@@ -38,11 +38,6 @@ class NoteFactory extends Factory
         return $this->state(fn () => ['type' => 'efm']);
     }
 
-    public function exam(): static
-    {
-        return $this->state(fn () => ['type' => 'exam']);
-    }
-
     public function admis(): static
     {
         return $this->state(fn () => [

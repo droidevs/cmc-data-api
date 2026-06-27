@@ -14,16 +14,16 @@ namespace App\Enums;
  */
 enum AffectationMode: string
 {
-    case Presentiel = 'presentiel';
-    case Synchrone = 'synchrone';
-    case Async = 'async';
+    case PRESENTIEL = 'presentiel';
+    case SYNCHRONE = 'synchrone';
+    case ASYNC = 'async';
 
     public function label(): string
     {
         return match ($this) {
-            self::Presentiel => 'Résidentiel',
-            self::Synchrone => 'Synchrone',
-            self::Async => 'Asynchrone',
+            self::PRESENTIEL => 'Résidentiel',
+            self::SYNCHRONE => 'Synchrone',
+            self::ASYNC => 'Asynchrone',
         };
     }
 }

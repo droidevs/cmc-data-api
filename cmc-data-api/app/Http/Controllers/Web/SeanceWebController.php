@@ -36,7 +36,7 @@ class SeanceWebController extends WebController
 
     public function store(StoreSeanceRequest $request)
     {
-        $seance = Seance::create($request->validated());
+        $seance = $this->service->create($request->validated());
 
         return redirect()->route('web.seances.show', $seance)
             ->with('success', 'Séance créée avec succès.');
@@ -54,7 +54,7 @@ class SeanceWebController extends WebController
 
     public function update(UpdateSeanceRequest $request, Seance $seance)
     {
-        $seance->update($request->validated());
+        $this->service->update($seance, $request->validated());
 
         return redirect()->route('web.seances.show', $seance)
             ->with('success', 'Séance mise à jour.');
@@ -62,7 +62,7 @@ class SeanceWebController extends WebController
 
     public function destroy(Seance $seance)
     {
-        $seance->delete();
+        $this->service->delete($seance);
 
         return redirect()->route('web.seances.index')
             ->with('success', 'Séance supprimée.');

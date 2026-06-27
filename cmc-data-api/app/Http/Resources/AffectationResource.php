@@ -14,6 +14,7 @@ class AffectationResource extends JsonResource
         return [
             'id'                => $this->id,
             'groupe_id'         => $this->groupe_id,
+            'module_id'         => $this->module_id,
             'module_code'       => $this->module_code,
 
             // Présentiel trainer (Mle Affecté Présentiel Actif)

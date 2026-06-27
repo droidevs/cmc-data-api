@@ -77,7 +77,7 @@ class AffectationFactory extends Factory
 
         return [
             'groupe_id'         => Groupe::factory(),
-            'module_code'       => Module::factory(),
+            'module_id'         => Module::factory(),
             'formateur_mle'     => $formateurMle,
             'formateur_mle_syn' => $formateurMleSyn,
             'mode'              => $this->faker->randomElement(['Résidentiel', 'Alternance']),
@@ -137,7 +137,7 @@ class AffectationFactory extends Factory
     }
 
     /**
-     * State: keeps groupe_id / module_code coherent by picking a Module that
+     * State: keeps groupe_id / module_id coherent by picking a Module that
      * actually belongs to the same Annee as the Groupe being affected.
      *
      * Without this, the default factory wires a brand-new random Groupe and
@@ -180,12 +180,12 @@ class AffectationFactory extends Factory
 
                 return [
                     'groupe_id'   => Groupe::factory()->state(['annee_id' => $anneeId]),
-                    'module_code' => Module::factory()->state(['annee_id' => $anneeId]),
+                    'module_id' => Module::factory()->state(['annee_id' => $anneeId]),
                 ];
             }
 
             return [
-                'module_code' => Module::factory()->state(['annee_id' => $anneeId]),
+                'module_id' => Module::factory()->state(['annee_id' => $anneeId]),
             ];
         });
     }

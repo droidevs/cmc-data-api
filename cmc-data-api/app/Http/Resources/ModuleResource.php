@@ -21,6 +21,11 @@ class ModuleResource extends JsonResource
 
             // Régional column: O / N → true / false
             'regional'    => $this->regional,
+            'mh_presentiel' => $this->mh_presentiel,
+            'mh_syn'        => $this->mh_syn,
+            'mh_asyn'       => $this->mh_asyn,
+            'mh_totale'     => $this->mh_totale,
+            'mh_planifiee_somme' => $this->mh_planifiee_somme,
 
             'created_at'  => $this->created_at,
             'updated_at'  => $this->updated_at,
@@ -28,6 +33,7 @@ class ModuleResource extends JsonResource
             // Relationships (loaded on demand)
             'annee'        => new AnneeResource($this->whenLoaded('annee')),
             'affectations' => AffectationResource::collection($this->whenLoaded('affectations')),
+            'avancements'  => AvancementResource::collection($this->whenLoaded('avancements')),
         ];
     }
 }

@@ -37,10 +37,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Module extends Model
 {
-    protected $primaryKey = 'code_module';
-    public $incrementing  = false;
-    protected $keyType    = 'string';
-
     protected $fillable = [
         'code_module',
         'annee_id',
@@ -71,7 +67,7 @@ class Module extends Model
     /** @return HasMany<Affectation> */
     public function affectations(): HasMany
     {
-        return $this->hasMany(Affectation::class, 'module_code', 'code_module');
+        return $this->hasMany(Affectation::class);
     }
 
     /** @return HasMany<Avancement> */

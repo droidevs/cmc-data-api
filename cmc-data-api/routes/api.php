@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AffectationController;
 use App\Http\Controllers\Api\AnneeController;
+use App\Http\Controllers\Api\AvancementController;
 use App\Http\Controllers\Api\EspaceController;
 use App\Http\Controllers\Api\FiliereController;
 use App\Http\Controllers\Api\FormateurController;
@@ -55,6 +56,9 @@ Route::prefix('v1')->group(function () {
         ->only(['index', 'show']);
 
     Route::apiResource('time-ranges', TimeRangeController::class)
+        ->only(['index', 'show']);
+
+    Route::apiResource('avancements', AvancementController::class)
         ->only(['index', 'show']);
 
     // ─── Groupe ────────────────────────────────────────────────────────────

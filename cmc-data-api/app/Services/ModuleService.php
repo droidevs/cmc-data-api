@@ -16,12 +16,20 @@ class ModuleService extends BaseService
 
     protected function defaultShowWith(): array
     {
-        return ['annee', 'annee.filiere', 'affectations', 'affectations.groupe', 'affectations.formateur'];
+        return [
+            'annee', 'annee.filiere',
+            'affectations', 'affectations.groupe', 'affectations.formateur',
+            'avancements', 'avancements.groupe',
+        ];
     }
 
     protected function allowedIncludes(): array
     {
-        return ['annee', 'annee.filiere', 'affectations', 'affectations.groupe', 'affectations.formateur'];
+        return [
+            'annee', 'annee.filiere',
+            'affectations', 'affectations.groupe', 'affectations.formateur',
+            'avancements', 'avancements.groupe',
+        ];
     }
 
     protected function baseQuery(): \Illuminate\Database\Eloquent\Builder

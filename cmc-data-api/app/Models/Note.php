@@ -25,8 +25,8 @@ class Note extends Model
 {
     /** Séance types that may carry a Note. A plain "cours" séance cannot. */
     public const EVALUABLE_SEANCE_TYPES = [
-        NoteType::CC,
-        NoteType::EFM
+        NoteType::CC->value,
+        NoteType::EFM->value
     ];
 
     protected $fillable = ['seance_id', 'stagiaire_cef', 'valeur', 'type', 'decision'];

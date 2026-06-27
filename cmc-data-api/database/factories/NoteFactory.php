@@ -17,10 +17,10 @@ class NoteFactory extends Factory
         $valeur = $this->faker->randomFloat(2, 0, 20);
 
         return [
-            'seance_id'     => Seance::factory(),
+            'seance_id'     => Seance::factory()->cc(),
             'stagiaire_cef' => Stagiaire::factory(),
             'valeur'        => $valeur,
-            'type'          => $this->faker->randomElement(['cc', 'efm', 'tp', 'th', 'syn', 'exam']),
+            'type'          => 'cc',
             // Match StoreNoteRequest validation: Admis|Redoublant|Abandon|Rattrapage
             'decision'      => $valeur >= 10
                 ? 'Admis'

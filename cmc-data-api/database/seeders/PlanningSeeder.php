@@ -71,7 +71,7 @@ class PlanningSeeder extends Seeder
                     ->assigned()
                     ->create([
                         'groupe_id'     => $groupe->getKey(),
-                        'module_code'   => $module->getKey(),
+                        'module_id'     => $module->getKey(),
                         'formateur_mle' => $formateur->getKey(),
                         // Only the two modes observed in the real dataset.
                         'mode'          => $groupe->mode ?? 'Résidentiel',

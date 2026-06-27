@@ -29,7 +29,7 @@ class StoreAffectationRequest extends FormRequest
     {
         return [
             'groupe_id'          => ['required', 'integer', 'exists:groupes,id'],
-            'module_code'        => ['required', 'string', 'exists:modules,code_module'],
+            'module_id'          => ['required', 'integer', 'exists:modules,id'],
 
             // Primary (présentiel) formateur — nullable: module may be unassigned
             'formateur_mle'      => ['nullable', 'string', 'exists:formateurs,mle'],
@@ -53,8 +53,8 @@ class StoreAffectationRequest extends FormRequest
         return [
             'groupe_id.required'   => 'Le groupe est obligatoire.',
             'groupe_id.exists'     => 'Ce groupe n\'existe pas.',
-            'module_code.required' => 'Le code module est obligatoire.',
-            'module_code.exists'   => 'Ce module n\'existe pas.',
+            'module_id.required' => 'Le module est obligatoire.',
+            'module_id.exists'   => 'Ce module n\'existe pas.',
             'formateur_mle.exists' => 'Ce formateur (présentiel) n\'existe pas.',
             'formateur_mle_syn.exists' => 'Ce formateur (synchrone) n\'existe pas.',
             'mode.in'              => 'Le mode doit être Résidentiel ou Alternance.',

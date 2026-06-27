@@ -13,8 +13,8 @@ enum SeanceType:string
     {
         return match ($this) {
             self::COURS => 'Cours',
-            self::CC => 'Controle Continue',
-            self::EFM => 'Evaluation Fin de Formation',
+            self::CC => 'Contrôle continu',
+            self::EFM => 'Exam fin de module',
         };
     }
 }

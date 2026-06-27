@@ -22,7 +22,7 @@ class UpdateAffectationRequest extends FormRequest
     {
         return [
             'groupe_id'         => ['sometimes', 'integer', 'exists:groupes,id'],
-            'module_code'       => ['sometimes', 'string', 'exists:modules,code_module'],
+            'module_id'         => ['sometimes', 'integer', 'exists:modules,id'],
             'formateur_mle'     => ['sometimes', 'nullable', 'string', 'exists:formateurs,mle'],
             'formateur_mle_syn' => ['sometimes', 'nullable', 'string', 'exists:formateurs,mle'],
             'mode'              => ['sometimes', 'nullable', 'string', 'in:Résidentiel,Alternance'],
@@ -35,7 +35,7 @@ class UpdateAffectationRequest extends FormRequest
     {
         return [
             'groupe_id.exists'         => 'Ce groupe n\'existe pas.',
-            'module_code.exists'       => 'Ce module n\'existe pas.',
+            'module_id.exists'         => 'Ce module n\'existe pas.',
             'formateur_mle.exists'     => 'Ce formateur (présentiel) n\'existe pas.',
             'formateur_mle_syn.exists' => 'Ce formateur (synchrone) n\'existe pas.',
             'mode.in'                  => 'Le mode doit être Résidentiel ou Alternance.',

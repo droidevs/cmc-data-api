@@ -90,7 +90,8 @@ class SeanceFilter extends QueryFilter
 
     protected function filterModuleCode(mixed $value): void
     {
-        $this->builder->whereHas('affectation', fn ($q) => $q->where('module_code', $value));
+        $values = is_array($value) ? $value : array_filter(array_map('trim', explode(',', (string) $value)));
+        $this->builder->whereHas('affectation.module', fn ($q) => $q->whereIn('code_module', $values));
     }
 
     protected function filterFormateurMle(mixed $value): void

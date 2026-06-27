@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Web\AffectationWebController;
 use App\Http\Controllers\Web\AnneeWebController;
+use App\Http\Controllers\Web\AvancementWebController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\EspaceWebController;
 use App\Http\Controllers\Web\FiliereWebController;
@@ -27,6 +28,7 @@ Route::prefix('dashboard')->name('web.')->group(function () {
     Route::resource('stagiaires',     StagiaireWebController::class)    ->only(['index', 'show'])->names('stagiaires');
     Route::resource('groupes',        GroupeWebController::class)       ->only(['index', 'show'])->names('groupes');
     Route::resource('modules',        ModuleWebController::class)       ->only(['index', 'show'])->names('modules');
+    Route::resource('avancements',    AvancementWebController::class)   ->only(['index', 'show'])->names('avancements');
     Route::resource('filieres',       FiliereWebController::class)      ->only(['index', 'show'])->names('filieres');
     Route::resource('annees',         AnneeWebController::class)        ->only(['index', 'show'])->names('annees');
     Route::resource('niveaux',        NiveauWebController::class)       ->only(['index', 'show'])->names('niveaux');

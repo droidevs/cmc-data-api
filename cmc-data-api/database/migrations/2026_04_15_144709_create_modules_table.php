@@ -21,6 +21,10 @@ return new class extends Migration
             $table->foreignId('annee_id')->constrained('annees')->cascadeOnDelete();
             $table->string('libelle');
             $table->boolean('regional')->default(false);
+            $table->decimal('mh_presentiel', 8, 2)->default(0);
+            $table->decimal('mh_syn', 8, 2)->default(0);
+            $table->decimal('mh_asyn', 8, 2)->default(0);
+            $table->decimal('mh_totale', 8, 2)->default(0);
             $table->timestamps();
 
             $table->unique(['code_module', 'annee_id']);

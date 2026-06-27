@@ -10,8 +10,8 @@ enum NoteType:string
     public static function label(): array
     {
         return [
-            self::CC->name => 'Controle Continue',
-            self::EFM->name => 'Evaluation Fin de Formation',
+            self::CC->value => 'Contrôle continu',
+            self::EFM->value => 'Exam fin de module',
         ];
     }
 

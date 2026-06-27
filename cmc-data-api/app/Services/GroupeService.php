@@ -16,12 +16,16 @@ class GroupeService extends BaseService
 
     protected function defaultShowWith(): array
     {
-        return ['annee', 'stagiaires', 'affectations', 'affectations.module', 'affectations.formateur'];
+        return [
+            'annee', 'annee.filiere', 'stagiaires',
+            'affectations', 'affectations.module', 'affectations.formateur',
+            'avancements', 'avancements.module',
+        ];
     }
 
     protected function allowedIncludes(): array
     {
-        return ['annee', 'stagiaires', 'affectations'];
+        return ['annee', 'annee.filiere', 'stagiaires', 'affectations', 'avancements', 'avancements.module'];
     }
 
     protected function baseQuery(): \Illuminate\Database\Eloquent\Builder

@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests\Note;
 
+use App\Models\Note;
+use App\Models\Seance;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 /**
  * Validation for creating a new Note.
@@ -42,12 +45,23 @@ class StoreNoteRequest extends FormRequest
             // Grade: 0–20 with 2 decimal places; nullable until grading occurs
             'valeur'   => ['nullable', 'numeric', 'min:0', 'max:20'],
 
-            // Note type derived from BasePlateEvaluation TYPE D'EPREUVE / session type
-            'type'     => ['nullable', 'string', 'in:cc,efm,tp,th,syn,exam'],
-
             // DECISION column: result of the deliberation
             'decision' => ['nullable', 'string', 'in:Admis,Redoublant,Abandon,Rattrapage'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            $seance = Seance::find($this->input('seance_id'));
+
+            if ($seance && ! in_array($seance->type, Note::EVALUABLE_SEANCE_TYPES, true)) {
+                $validator->errors()->add(
+                    'seance_id',
+                    'Impossible de créer une note pour une séance de cours. Choisissez une séance CC, EFM ou examen.'
+                );
+            }
+        });
     }
 
     public function messages(): array
@@ -60,7 +74,6 @@ class StoreNoteRequest extends FormRequest
             'valeur.numeric'         => 'La note doit être un nombre.',
             'valeur.min'             => 'La note ne peut pas être négative.',
             'valeur.max'             => 'La note ne peut pas dépasser 20.',
-            'type.in'                => 'Le type doit être : cc, efm, tp, th, syn ou exam.',
             'decision.in'            => 'La décision doit être : Admis, Redoublant, Abandon ou Rattrapage.',
         ];
     }

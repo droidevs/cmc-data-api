@@ -9,6 +9,8 @@ use App\Models\Seance;
 
 class SeanceService extends BaseService
 {
+    public function __construct(private AvancementService $avancements) {}
+
     protected function modelClass(): string { return Seance::class; }
     protected function filterClass(): string { return SeanceFilter::class; }
 
@@ -41,17 +43,33 @@ class SeanceService extends BaseService
     public function create(array $validated): Seance
     {
         $seance = Seance::create($validated);
+        $this->avancements->refreshForSeance($seance);
+
         return $seance->load(['affectation', 'timeRange', 'espace']);
     }
 
     public function update(Seance $seance, array $validated): Seance
     {
+        $oldAffectation = $seance->affectation;
         $seance->update($validated);
+        $seance->refresh();
+
+        if ($oldAffectation) {
+            $this->avancements->refreshForAffectation($oldAffectation);
+        }
+
+        $this->avancements->refreshForSeance($seance);
+
         return $seance->load(['affectation', 'timeRange', 'espace']);
     }
 
     public function delete(Seance $seance): void
     {
+        $affectation = $seance->affectation;
         $seance->delete();
+
+        if ($affectation) {
+            $this->avancements->refreshForAffectation($affectation);
+        }
     }
 }

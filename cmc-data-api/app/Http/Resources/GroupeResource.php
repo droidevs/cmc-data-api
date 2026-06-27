@@ -31,6 +31,7 @@ class GroupeResource extends JsonResource
             'annee'        => new AnneeResource($this->whenLoaded('annee')),
             'stagiaires'   => StagiaireResource::collection($this->whenLoaded('stagiaires')),
             'affectations' => AffectationResource::collection($this->whenLoaded('affectations')),
+            'avancements'  => AvancementResource::collection($this->whenLoaded('avancements')),
         ];
     }
 }

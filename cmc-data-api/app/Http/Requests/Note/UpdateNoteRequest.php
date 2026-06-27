@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests\Note;
 
+use App\Models\Note;
+use App\Models\Seance;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 /**
  * Validation for updating an existing Note (PATCH semantics).
@@ -24,9 +27,24 @@ class UpdateNoteRequest extends FormRequest
             'seance_id'     => ['sometimes', 'integer', 'exists:seances,id'],
             'stagiaire_cef' => ['sometimes', 'string', 'exists:stagiaires,cef'],
             'valeur'        => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:20'],
-            'type'          => ['sometimes', 'nullable', 'string', 'in:cc,efm,tp,th,syn,exam'],
             'decision'      => ['sometimes', 'nullable', 'string', 'in:Admis,Redoublant,Abandon,Rattrapage'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            $note = $this->route('note');
+            $seanceId = $this->input('seance_id', $note?->seance_id);
+            $seance = Seance::find($seanceId);
+
+            if ($seance && ! in_array($seance->type, Note::EVALUABLE_SEANCE_TYPES, true)) {
+                $validator->errors()->add(
+                    'seance_id',
+                    'Impossible de créer une note pour une séance de cours. Choisissez une séance CC, EFM ou examen.'
+                );
+            }
+        });
     }
 
     public function messages(): array
@@ -37,7 +55,6 @@ class UpdateNoteRequest extends FormRequest
             'valeur.numeric'         => 'La note doit être un nombre.',
             'valeur.min'             => 'La note ne peut pas être négative.',
             'valeur.max'             => 'La note ne peut pas dépasser 20.',
-            'type.in'                => 'Le type doit être : cc, efm, tp, th, syn ou exam.',
             'decision.in'            => 'La décision doit être : Admis, Redoublant, Abandon ou Rattrapage.',
         ];
     }

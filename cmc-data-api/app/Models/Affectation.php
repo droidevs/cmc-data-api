@@ -28,7 +28,7 @@ class Affectation extends Model
 {
     protected $fillable = [
         'groupe_id',
-        'module_code',
+        'module_id',
         'formateur_mle',        // trainer for presentiel sessions
         'formateur_mle_syn',    // ← NEW: trainer for synchronous sessions
         'mode',
@@ -52,7 +52,7 @@ class Affectation extends Model
     /** @return BelongsTo<Module, Affectation> */
     public function module(): BelongsTo
     {
-        return $this->belongsTo(Module::class, 'module_code', 'code_module');
+        return $this->belongsTo(Module::class);
     }
 
     /** Trainer for in-person (présentiel) sessions. */
@@ -94,5 +94,10 @@ class Affectation extends Model
     public function getMhTotaleAttribute(): float
     {
         return (float) $this->mh_affecte + (float) $this->mh_affecte_syn;
+    }
+
+    public function getModuleCodeAttribute(): ?string
+    {
+        return $this->module?->code_module;
     }
 }

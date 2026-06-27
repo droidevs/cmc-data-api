@@ -75,6 +75,12 @@ class ModuleFactory extends Factory
             'annee_id'    => Annee::factory(),
             'libelle'     => $data['libelle'],
             'regional'    => $data['regional'],
+            'mh_presentiel' => $this->faker->randomElement([15, 30, 45, 70, 75, 80]),
+            'mh_syn' => $this->faker->randomElement([0, 5, 10, 15, 20, 25]),
+            'mh_asyn' => $this->faker->randomElement([0, 5, 10, 25]),
+            'mh_totale' => function (array $attributes) {
+                return (float) $attributes['mh_presentiel'] + (float) $attributes['mh_syn'] + (float) $attributes['mh_asyn'];
+            },
         ];
     }
 

@@ -26,6 +26,7 @@ class AffectationFilter extends QueryFilter
     {
         return [
             'groupe_id' => 'filterGroupeId',
+            'module_id' => 'filterModuleId',
             'module_code' => 'filterModuleCode',
             'formateur_mle' => 'filterFormateurMle',
             'mode' => 'filterMode',
@@ -53,7 +54,13 @@ class AffectationFilter extends QueryFilter
 
     protected function filterModuleCode(mixed $value): void
     {
-        $this->inList('module_code', $value);
+        $values = is_array($value) ? $value : array_filter(array_map('trim', explode(',', (string) $value)));
+        $this->builder->whereHas('module', fn ($query) => $query->whereIn('code_module', $values));
+    }
+
+    protected function filterModuleId(mixed $value): void
+    {
+        $this->inList('module_id', $value);
     }
 
     protected function filterFormateurMle(mixed $value): void

@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Excel mapping:
  *   Groupe           → code       (e.g. "DEV101", "DEVOWFS201")
  *   Effectif Groupe  → effectif
- *   Mode             → mode       ← NEW: "Résidentiel" | "Alternance" …
+ *   Mode             → mode       "Résidentiel" | "Alternance" …
  *   Code Filière     → annee.filiere_code
  *   Année de formation → annee.libelle
  */
@@ -25,7 +25,7 @@ class Groupe extends Model
         'annee_id',
         'code',
         'effectif',
-        'mode',   // ← NEW: mode de formation (Résidentiel / Alternance)
+        'mode',
     ];
 
     protected $casts = [
@@ -50,6 +50,18 @@ class Groupe extends Model
     public function affectations(): HasMany
     {
         return $this->hasMany(Affectation::class);
+    }
+
+    /**
+     * Per-module progress tracking for this groupe (hours realized vs
+     * planned). Kept in sync automatically by AvancementService whenever
+     * a Seance is created/deleted for one of this groupe's affectations.
+     *
+     * @return HasMany<Avancement>
+     */
+    public function avancements(): HasMany
+    {
+        return $this->hasMany(Avancement::class);
     }
 
     // ─── Scopes ───────────────────────────────────────────────────────────────

@@ -25,9 +25,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(AuditRequests::class);
 
         $middleware->trustHosts();
+        // issues the config is not loaded in time
+//        $middleware->preventRequestForgery(
+//            originOnly: config('security.csrf.origin_only', false),
+//            allowSameSite: config('security.csrf.allow_same_site', false),
+//        );
+
         $middleware->preventRequestForgery(
-            originOnly: config('security.csrf.origin_only', false),
-            allowSameSite: config('security.csrf.allow_same_site', false),
+            originOnly:false,
+            allowSameSite: false,
         );
 
         $middleware->throttleApi('api');

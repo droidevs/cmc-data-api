@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Seance extends Model
 {
-    protected $fillable = ['affectation_id','espace_id', 'type', 'date', 'time_range_id'];
+    protected $fillable = ['affectation_id', 'espace_id', 'type', 'date', 'time_range_id'];
 
     protected $casts = [
         'date' => 'date',
@@ -35,5 +35,17 @@ class Seance extends Model
     public function notes(): HasMany
     {
         return $this->hasMany(Note::class);
+    }
+
+    /**
+     * Whether this séance's type is an evaluable one (i.e. notes are
+     * allowed). A plain "cours" séance never carries a grade — only
+     * cc | efm | exam séances do. Mirrors NoteService::assertEvaluable()
+     * and is exposed here so views/forms can check it without duplicating
+     * the vocabulary.
+     */
+    public function getIsEvaluableAttribute(): bool
+    {
+        return in_array($this->type, Note::EVALUABLE_SEANCE_TYPES, true);
     }
 }

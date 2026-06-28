@@ -27,9 +27,12 @@ class Espace extends Model
         'capacite',
     ];
 
-    protected $casts = [
-        'capacite' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'capacite' => 'integer',
+        ];
+    }
 
     // ─── Relationships ────────────────────────────────────────────────────────
 
@@ -55,12 +58,12 @@ class Espace extends Model
     /** Espaces with enough capacite to host a group of the given size. */
     public function scopeWithCapacityFor(Builder $query, int $effectif): Builder
     {
-        return $query->where(function (Builder $q) use ($effectif) {
+        return $query->where(function (Builder $q) use ($effectif): void {
             $q->whereNull('capacite')->orWhere('capacite', '>=', $effectif);
         });
     }
 
-    // ─── Helpers ──────────────────────────────────────────────────────────────
+    // ─── Domain Methods ───────────────────────────────────────────────────────
 
     /**
      * Whether this espace is free for the given date and time range

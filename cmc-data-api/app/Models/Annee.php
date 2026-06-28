@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,8 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *   Année de formation → libelle  (integer: 1, 2)
  *   Code Filière       → filiere_code
  *
- * Stored as "1ère année" / "2ème année" in lister_minimized (anneeEtude),
- * but we keep it as an integer (1 or 2) and expose a label accessor.
+ * Stored as an integer (1 or 2); use `formattedLabel()` for the French
+ * human-readable form ("1ère année" / "2ème année").
  */
 class Annee extends Model
 {
@@ -28,9 +29,12 @@ class Annee extends Model
         'libelle',       // integer year (1 or 2)
     ];
 
-    protected $casts = [
-        'libelle' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'libelle' => 'integer',
+        ];
+    }
 
     // ─── Relationships ────────────────────────────────────────────────────────
 
@@ -54,13 +58,19 @@ class Annee extends Model
 
     // ─── Accessors ────────────────────────────────────────────────────────────
 
-    /** Human-readable French label: "1ère année", "2ème année" */
-    public function getLabelAttribute(): string
+    /**
+     * Human-readable French label: "1ère année", "2ème année".
+     * Use this accessor in views; avoid adding to $appends to prevent
+     * polluting array/JSON serialisation.
+     */
+    protected function label(): Attribute
     {
-        return match ($this->libelle) {
-            1       => '1ère année',
-            2       => '2ème année',
-            default => "{$this->libelle}ème année",
-        };
+        return Attribute::make(
+            get: fn () => match ($this->libelle) {
+                1       => '1ère année',
+                2       => '2ème année',
+                default => "{$this->libelle}ème année",
+            },
+        );
     }
 }

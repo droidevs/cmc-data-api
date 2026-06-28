@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *   filière           → libelle
  *   Type de formation → type_formation_id
  *   Niveau            → niveau_id     (TS, T, Q, FQ …)
- *   Secteur           → secteur       ← NEW: e.g. "Digital et Intelligence Artificielle"
+ *   Secteur           → secteur       e.g. "Digital et Intelligence Artificielle"
  *   Pôle              → pole_id
  */
 class Filiere extends Model
@@ -35,7 +35,7 @@ class Filiere extends Model
         'niveau_id',
         'type_formation_id',
         'libelle',
-        'secteur',   // ← NEW: matches "Secteur" column in AvancementProgramme
+        'secteur',
     ];
 
     // ─── Relationships ────────────────────────────────────────────────────────

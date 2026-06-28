@@ -1,42 +1,43 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enums\NoteType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Note (grade) for one stagiaire on one séance.
  *
- * `type` is no longer an independently-chosen value — it must always
- * equal the parent Seance's `type` (enforced in StoreNoteRequest /
- * UpdateNoteRequest, and re-asserted in NoteService::create()/update() as
- * a defence-in-depth check, since a Note only makes sense in the context
- * of the séance that produced it).
+ * `type` mirrors the parent Seance's `type` and must always match it
+ * (enforced in StoreNoteRequest / UpdateNoteRequest, and re-asserted in
+ * NoteService::create()/update() as a defence-in-depth check).
  *
- * Only "evaluable" séance types actually carry a grade — a plain "cours"
- * séance is a regular class session with nothing to assess, so creating a
- * Note against a "cours" séance is rejected. EVALUABLE_SEANCE_TYPES is the
- * single source of truth for which types qualify; both the Seance model
- * (Seance::is_evaluable) and the request validation classes read from it.
+ * Only "evaluable" séance types carry a grade — a plain "cours" séance
+ * cannot have a Note. Use NoteType::evaluable() as the single source of
+ * truth for which types qualify.
+ *
+ * @property NoteType $type
  */
 class Note extends Model
 {
-    use HasFactory;
-
-    /** Séance types that may carry a Note. A plain "cours" séance cannot. */
-    public const EVALUABLE_SEANCE_TYPES = [
-        NoteType::CC->value,
-        NoteType::EFM->value
-    ];
+    use HasFactory, SoftDeletes;
 
     protected $fillable = ['seance_id', 'stagiaire_cef', 'valeur', 'type', 'decision'];
 
-    protected $casts = [
-        'valeur' => 'decimal:2',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'type'   => NoteType::class,
+            'valeur' => 'decimal:2',
+        ];
+    }
+
+    // ─── Relationships ────────────────────────────────────────────────────────
 
     /** @return BelongsTo<Seance, Note> */
     public function seance(): BelongsTo

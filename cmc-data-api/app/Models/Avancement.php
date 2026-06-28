@@ -43,14 +43,17 @@ class Avancement extends Model
         'taux_realisation_globale',
     ];
 
-    protected $casts = [
-        'mh_realisee_presentiel'      => 'decimal:2',
-        'mh_realisee_syn'             => 'decimal:2',
-        'mh_realisee_globale'         => 'decimal:2',
-        'taux_realisation_presentiel' => 'decimal:2',
-        'taux_realisation_syn'        => 'decimal:2',
-        'taux_realisation_globale'    => 'decimal:2',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'mh_realisee_presentiel'      => 'decimal:2',
+            'mh_realisee_syn'             => 'decimal:2',
+            'mh_realisee_globale'         => 'decimal:2',
+            'taux_realisation_presentiel' => 'decimal:2',
+            'taux_realisation_syn'        => 'decimal:2',
+            'taux_realisation_globale'    => 'decimal:2',
+        ];
+    }
 
     // ─── Relationships ────────────────────────────────────────────────────────
 
@@ -63,7 +66,7 @@ class Avancement extends Model
     /** @return BelongsTo<Module, Avancement> */
     public function module(): BelongsTo
     {
-        return $this->belongsTo(Module::class, 'module_id', 'id');
+        return $this->belongsTo(Module::class); // module_id / id — convention defaults
     }
 
     // ─── Scopes ───────────────────────────────────────────────────────────────
@@ -73,7 +76,8 @@ class Avancement extends Model
         return $query->where('groupe_id', $groupeId);
     }
 
-    public function scopeForModule(Builder $query, string $moduleId): Builder
+    /** @param int $moduleId Surrogate PK of Module (modules.id) */
+    public function scopeForModule(Builder $query, int $moduleId): Builder
     {
         return $query->where('module_id', $moduleId);
     }

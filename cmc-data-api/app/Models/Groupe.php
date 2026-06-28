@@ -14,10 +14,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Groupe (class group) sourced from AvancementProgramme.xlsx.
  *
  * Excel mapping:
- *   Groupe           → code       (e.g. "DEV101", "DEVOWFS201")
- *   Effectif Groupe  → effectif
- *   Mode             → mode       "Résidentiel" | "Alternance" …
- *   Code Filière     → annee.filiere_code
+ *   Groupe             → code       (e.g. "DEV101", "DEVOWFS201")
+ *   Effectif Groupe    → effectif
+ *   Mode               → mode       ("Résidentiel" | "Alternance" — raw Excel string)
+ *   Code Filière       → annee.filiere_code
  *   Année de formation → annee.libelle
  */
 class Groupe extends Model
@@ -31,9 +31,12 @@ class Groupe extends Model
         'mode',
     ];
 
-    protected $casts = [
-        'effectif' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'effectif' => 'integer',
+        ];
+    }
 
     // ─── Relationships ────────────────────────────────────────────────────────
 
@@ -69,6 +72,7 @@ class Groupe extends Model
 
     // ─── Scopes ───────────────────────────────────────────────────────────────
 
+    /** Résidentiel (in-person) groupes. */
     public function scopeResidentiel(Builder $query): Builder
     {
         return $query->where('mode', 'Résidentiel');

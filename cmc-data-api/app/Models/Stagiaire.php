@@ -4,34 +4,39 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\Genre;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Stagiaire (trainee / student) sourced from lister_minimized.xlsx
  * and BasePlateEvaluation.xlsx.
  *
  * Excel mapping:
- *   MatriculeEtudiant → cef         (PK, string)
+ *   MatriculeEtudiant → cef            (PK, string)
  *   CIN               → cni
  *   Nom               → nom
  *   Prenom            → prenom
- *   Nom_Arabe         → nom_arabe   ← NEW
- *   Prenom_arabe      → prenom_arabe← NEW
- *   Sexe              → genre       (F / H)
+ *   Nom_Arabe         → nom_arabe
+ *   Prenom_arabe      → prenom_arabe
+ *   Sexe              → genre          (Genre enum: F / H)
  *   DateNaissance     → date_naissance
- *   CodeDiplome       → groupe_id   (via groupe lookup)
- *   NTelelephone      → telephone   ← NEW
- *   Adresse           → adresse     ← NEW
- *   NiveauScolaire    → niveau_scolaire ← NEW
- *   EtudiantActif     → actif       ← NEW (boolean)
+ *   CodeDiplome       → groupe_id      (via groupe lookup)
+ *   NTelelephone      → telephone
+ *   Adresse           → adresse
+ *   NiveauScolaire    → niveau_scolaire
+ *   EtudiantActif     → actif          (boolean)
+ *
+ * @property Genre|null $genre
  */
 class Stagiaire extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $primaryKey = 'cef';
     public $incrementing  = false;
@@ -47,16 +52,28 @@ class Stagiaire extends Model
         'prenom_arabe',
         'date_naissance',
         'genre',
-        'telephone',       // ← NTelelephone
+        'telephone',
         'adresse',
         'niveau_scolaire',
-        'actif',           // ← EtudiantActif boolean
+        'actif',
     ];
 
-    protected $casts = [
-        'date_naissance' => 'date',
-        'actif'          => 'boolean',
+    /** PII fields excluded from default serialization. */
+    protected $hidden = [
+        'cni',
+        'telephone',
+        'adresse',
+        'date_naissance',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'genre'          => Genre::class,
+            'date_naissance' => 'date',
+            'actif'          => 'boolean',
+        ];
+    }
 
     // ─── Relationships ────────────────────────────────────────────────────────
 
@@ -79,7 +96,7 @@ class Stagiaire extends Model
         return $query->where('actif', true);
     }
 
-    public function scopeByGenre(Builder $query, string $genre): Builder
+    public function scopeByGenre(Builder $query, Genre $genre): Builder
     {
         return $query->where('genre', $genre);
     }
@@ -94,13 +111,17 @@ class Stagiaire extends Model
 
     // ─── Accessors ────────────────────────────────────────────────────────────
 
-    public function getNomCompletAttribute(): string
+    protected function nomComplet(): Attribute
     {
-        return "{$this->nom} {$this->prenom}";
+        return Attribute::make(
+            get: fn () => "{$this->nom} {$this->prenom}",
+        );
     }
 
-    public function getAgeAttribute(): ?int
+    protected function age(): Attribute
     {
-        return $this->date_naissance?->age;
+        return Attribute::make(
+            get: fn (): ?int => $this->date_naissance?->age,
+        );
     }
 }

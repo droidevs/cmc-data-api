@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\FormateurStatut;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -25,6 +26,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Formateur extends Model
 {
+    use HasFactory;
+
     protected $primaryKey = 'mle';
     public $incrementing  = false;
     protected $keyType    = 'string';

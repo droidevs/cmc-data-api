@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Seance extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['affectation_id', 'espace_id', 'type', 'date', 'time_range_id'];
 
     protected $casts = [

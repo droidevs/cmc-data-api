@@ -73,8 +73,12 @@ class PlanningSeeder extends Seeder
                         'groupe_id'     => $groupe->getKey(),
                         'module_id'     => $module->getKey(),
                         'formateur_mle' => $formateur->getKey(),
-                        // Only the two modes observed in the real dataset.
-                        'mode'          => $groupe->mode ?? 'Résidentiel',
+                        'mode'          => match ($groupe->mode) {
+                            'Résidentiel' => 'presentiel',
+                            'Synchrone'   => 'synchrone',
+                            'Asynchrone'  => 'async',
+                            default       => 'presentiel',
+                        },
                     ]);
 
                 // 5 seances per affectation with (date + time_range)

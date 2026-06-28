@@ -114,7 +114,7 @@ class FormateurFactory extends Factory
 
         return [
             'mle'           => $mle,
-            'pole_id'       => Pole::factory(),
+            'pole_id'       => fn () => Pole::inRandomOrder()->first()?->id ?: Pole::factory(),
             'nom_prenom'    => "{$nom} {$prenom}",
             'statut'        => $statut,
             'email_edu'     => $email,

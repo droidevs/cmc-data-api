@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('seance_id')->constrained('seances')->cascadeOnDelete();
             $table->string('stagiaire_cef', 32);
             $table->decimal('valeur', 5, 2)->nullable();
-            $table->enum("type", (array)\App\Enums\NoteType::class)->default('CC');
+            $table->enum("type", array_column(\App\Enums\NoteType::cases(), 'value'))->default(\App\Enums\NoteType::CC->value);
             $table->string('decision', 64)->nullable();
             $table->timestamps();
             $table->softDeletes();

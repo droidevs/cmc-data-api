@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('niveaux', function (Blueprint $table) {
+        Schema::create('poles', function (Blueprint $table) {
             $table->id();
             $table->string('libelle')->unique()->index();
             $table->timestamps();
@@ -19,6 +19,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('niveaux');
+        Schema::dropIfExists('poles');
     }
 };

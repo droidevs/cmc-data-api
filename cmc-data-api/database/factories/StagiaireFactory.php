@@ -25,7 +25,7 @@ class StagiaireFactory extends Factory
 
         return [
             'cef'            => $cef,
-            'groupe_id'      => Groupe::factory(),
+            'groupe_id'      => fn () => Groupe::inRandomOrder()->first()?->id ?: Groupe::factory(),
             'cni'            => strtoupper($this->faker->unique()->bothify('??######')),
             'nom'            => $nom,
             'prenom'         => $prenom,

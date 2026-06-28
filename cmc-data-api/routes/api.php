@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AffectationController;
+use App\Http\Controllers\Api\ImportController;
 use App\Http\Controllers\Api\AnneeController;
 use App\Http\Controllers\Api\AvancementController;
 use App\Http\Controllers\Api\EspaceController;
@@ -76,5 +77,8 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('seances', SeanceController::class);
 
     Route::apiResource('notes', NoteController::class);
+
+    // ─── Import ────────────────────────────────────────────────────────────
+    Route::post('import', [ImportController::class, 'import'])->name('import');
 
 });

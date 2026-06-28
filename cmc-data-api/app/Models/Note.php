@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\NoteType;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -23,6 +24,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Note extends Model
 {
+    use HasFactory;
+
     /** Séance types that may carry a Note. A plain "cours" séance cannot. */
     public const EVALUABLE_SEANCE_TYPES = [
         NoteType::CC->value,

@@ -80,7 +80,7 @@ class AffectationFactory extends Factory
             'module_id'         => Module::factory(),
             'formateur_mle'     => $formateurMle,
             'formateur_mle_syn' => $formateurMleSyn,
-            'mode'              => $this->faker->randomElement(['Résidentiel', 'Alternance']),
+            'mode'              => $this->faker->randomElement(['presentiel', 'synchrone', 'async']),
             'mh_affecte'        => $hasFormateur ? $mhP : null,
             'mh_affecte_syn'    => $hasFormateur ? $mhS : null,
         ];

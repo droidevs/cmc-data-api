@@ -8,6 +8,11 @@
 @endsection
 
 @section('content')
+    @php
+        $typeColors = ['cc' => 'amber', 'efm' => 'navy', 'exam' => 'red', 'tp' => 'indigo', 'th' => 'gray', 'syn' => 'green'];
+        $decColors  = ['Admis' => 'green', 'Redoublant' => 'amber', 'Abandon' => 'red', 'Rattrapage' => 'indigo'];
+    @endphp
+
     <div class="page-header">
         <div style="display:flex;align-items:center;gap:16px">
             <div class="avatar" style="width:52px;height:52px;font-size:18px;background:{{ $stagiaire->genre === 'F' ? 'var(--indigo-soft)' : '#E3E8F5' }}">
@@ -22,11 +27,9 @@
             </div>
         </div>
         <div class="page-header-actions">
-            @if($stagiaire->actif)
-                <span class="badge badge-green" style="font-size:13px;padding:6px 14px">Actif</span>
-            @else
-                <span class="badge badge-red" style="font-size:13px;padding:6px 14px">Inactif</span>
-            @endif
+            <x-badge :color="$stagiaire->actif ? 'green' : 'red'" style="font-size:13px;padding:6px 14px">
+                {{ $stagiaire->actif ? 'Actif' : 'Inactif' }}
+            </x-badge>
         </div>
     </div>
 
@@ -45,9 +48,9 @@
                 <div class="detail-field">
                     <div class="detail-field-label">Genre</div>
                     <div class="detail-field-value">
-                    <span class="badge {{ $stagiaire->genre === 'F' ? 'badge-indigo' : 'badge-navy' }}">
-                        {{ $stagiaire->genre === 'F' ? 'Femme' : 'Homme' }}
-                    </span>
+                        <x-badge :color="$stagiaire->genre === 'F' ? 'indigo' : 'navy'">
+                            {{ $stagiaire->genre === 'F' ? 'Femme' : 'Homme' }}
+                        </x-badge>
                     </div>
                 </div>
                 @if($stagiaire->nom_arabe)
@@ -96,9 +99,9 @@
                         <div class="detail-field-label">Mode</div>
                         <div class="detail-field-value">
                             @if($stagiaire->groupe->mode)
-                                <span class="badge badge-{{ $stagiaire->groupe->mode === 'Résidentiel' ? 'indigo' : 'amber' }}">
-                            {{ $stagiaire->groupe->mode }}
-                        </span>
+                                <x-badge :color="$stagiaire->groupe->mode === 'Résidentiel' ? 'indigo' : 'amber'">
+                                    {{ $stagiaire->groupe->mode }}
+                                </x-badge>
                             @else — @endif
                         </div>
                     </div>
@@ -149,15 +152,14 @@
                     <tr>
                         <td>{{ $note->seance?->affectation?->module?->libelle ?? '—' }}</td>
                         <td>
-                            @php $typeC = ['cc'=>'amber','efm'=>'navy','exam'=>'red','tp'=>'indigo','th'=>'gray','syn'=>'green']; @endphp
-                            <span class="badge badge-{{ $typeC[$note->type] ?? 'gray' }}">{{ strtoupper($note->type ?? '?') }}</span>
+                            <x-badge :color="$typeColors[$note->type] ?? 'gray'">{{ strtoupper($note->type ?? '?') }}</x-badge>
                         </td>
                         <td>
                             @if($note->valeur !== null)
                                 <div class="score-bar">
-                            <span style="font-weight:700;min-width:36px;color:{{ $note->valeur >= 10 ? 'var(--green)' : 'var(--red)' }}">
-                                {{ number_format($note->valeur, 2) }}
-                            </span>
+                                    <span style="font-weight:700;min-width:36px;color:{{ $note->valeur >= 10 ? 'var(--green)' : 'var(--red)' }}">
+                                        {{ number_format($note->valeur, 2) }}
+                                    </span>
                                     <div class="score-track">
                                         <div class="score-fill {{ $note->valeur >= 10 ? 'pass' : 'fail' }}"
                                              style="width:{{ min(100, $note->valeur * 5) }}%"></div>
@@ -169,8 +171,7 @@
                         </td>
                         <td>
                             @if($note->decision)
-                                @php $dc = ['Admis'=>'green','Redoublant'=>'amber','Abandon'=>'red','Rattrapage'=>'indigo']; @endphp
-                                <span class="badge badge-{{ $dc[$note->decision] ?? 'gray' }}">{{ $note->decision }}</span>
+                                <x-badge :color="$decColors[$note->decision] ?? 'gray'">{{ $note->decision }}</x-badge>
                             @else <span class="text-muted">—</span> @endif
                         </td>
                         <td class="text-muted">{{ $note->seance?->date?->format('d/m/Y') }}</td>

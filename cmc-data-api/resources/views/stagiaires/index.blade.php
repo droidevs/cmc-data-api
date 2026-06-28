@@ -14,28 +14,30 @@
     <form method="GET" action="{{ route('web.stagiaires.index') }}">
         <div class="filter-bar">
             <div class="filter-group">
-                <label class="filter-label">Recherche</label>
-                <input type="text" name="q" class="filter-input" placeholder="Nom, prénom, CEF, CNI…" value="{{ request('q') }}">
+                <label class="filter-label" for="filter-q">Recherche</label>
+                <input id="filter-q" type="text" name="q" class="filter-input"
+                       placeholder="Nom, prénom, CEF, CNI…" value="{{ request('q') }}">
             </div>
             <div class="filter-group">
-                <label class="filter-label">Genre</label>
-                <select name="genre" class="filter-select">
+                <label class="filter-label" for="filter-genre">Genre</label>
+                <select id="filter-genre" name="genre" class="filter-select">
                     <option value="">Tous</option>
-                    <option value="H" {{ request('genre') === 'H' ? 'selected' : '' }}>Homme</option>
-                    <option value="F" {{ request('genre') === 'F' ? 'selected' : '' }}>Femme</option>
+                    <option value="H" @selected(request('genre') === 'H')>Homme</option>
+                    <option value="F" @selected(request('genre') === 'F')>Femme</option>
                 </select>
             </div>
             <div class="filter-group">
-                <label class="filter-label">Statut</label>
-                <select name="actif" class="filter-select">
+                <label class="filter-label" for="filter-actif">Statut</label>
+                <select id="filter-actif" name="actif" class="filter-select">
                     <option value="">Tous</option>
-                    <option value="1" {{ request('actif') === '1' ? 'selected' : '' }}>Actifs</option>
-                    <option value="0" {{ request('actif') === '0' ? 'selected' : '' }}>Inactifs</option>
+                    <option value="1" @selected(request('actif') === '1')>Actifs</option>
+                    <option value="0" @selected(request('actif') === '0')>Inactifs</option>
                 </select>
             </div>
             <div class="filter-group">
-                <label class="filter-label">Code groupe</label>
-                <input type="text" name="groupe_code" class="filter-input" placeholder="ex. DEV101" value="{{ request('groupe_code') }}" style="min-width:120px">
+                <label class="filter-label" for="filter-groupe-code">Code groupe</label>
+                <input id="filter-groupe-code" type="text" name="groupe_code" class="filter-input"
+                       placeholder="ex. DEV101" value="{{ request('groupe_code') }}" style="min-width:120px">
             </div>
             <div class="filter-actions">
                 <button type="submit" class="btn btn-primary">Filtrer</button>
@@ -46,11 +48,7 @@
 
     <div class="table-wrap">
         @if($items->isEmpty())
-            <div class="empty-state">
-                <div class="empty-icon">🎓</div>
-                <div class="empty-title">Aucun stagiaire trouvé</div>
-                <div class="empty-sub">Modifiez vos critères de recherche.</div>
-            </div>
+            <x-empty-state icon="🎓" title="Aucun stagiaire trouvé" subtitle="Modifiez vos critères de recherche." />
         @else
             <table>
                 <thead>
@@ -77,9 +75,9 @@
                             @endif
                         </td>
                         <td>
-                        <span class="badge {{ $stagiaire->genre === 'F' ? 'badge-indigo' : 'badge-navy' }}">
-                            {{ $stagiaire->genre === 'F' ? 'Femme' : 'Homme' }}
-                        </span>
+                            <x-badge :color="$stagiaire->genre === 'F' ? 'indigo' : 'navy'">
+                                {{ $stagiaire->genre === 'F' ? 'Femme' : 'Homme' }}
+                            </x-badge>
                         </td>
                         <td class="text-muted">{{ $stagiaire->date_naissance?->format('d/m/Y') }}</td>
                         <td>
@@ -87,14 +85,14 @@
                                 <a href="{{ route('web.groupes.show', $stagiaire->groupe) }}" class="badge badge-navy">
                                     {{ $stagiaire->groupe->code }}
                                 </a>
-                            @else <span class="text-muted">—</span> @endif
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
                         </td>
                         <td>
-                            @if($stagiaire->actif)
-                                <span class="badge badge-green">Actif</span>
-                            @else
-                                <span class="badge badge-red">Inactif</span>
-                            @endif
+                            <x-badge :color="$stagiaire->actif ? 'green' : 'red'">
+                                {{ $stagiaire->actif ? 'Actif' : 'Inactif' }}
+                            </x-badge>
                         </td>
                         <td><a href="{{ route('web.stagiaires.show', $stagiaire) }}" class="btn btn-outline btn-sm">Voir</a></td>
                     </tr>

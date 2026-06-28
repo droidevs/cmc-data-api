@@ -16,7 +16,7 @@ class NoteService extends BaseService
 
     protected function defaultWith(): array
     {
-        return ['seance', 'stagiaire'];
+        return ['seance.affectation.module', 'seance.affectation.groupe', 'seance.timeRange', 'stagiaire'];
     }
 
     protected function defaultShowWith(): array

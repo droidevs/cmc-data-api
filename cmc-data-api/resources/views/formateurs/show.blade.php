@@ -23,14 +23,17 @@
         </div>
     </div>
 
+    @php
+        $statutColors = ['OFPPT' => 'indigo', 'Vacataire' => 'amber', 'Contractuel' => 'gray'];
+    @endphp
+
     <div class="card" style="margin-bottom:24px">
         <div class="card-header"><span class="card-title">Informations</span></div>
         <div class="card-body">
             <div class="detail-grid thirds">
                 <div class="detail-field">
                     <div class="detail-field-label">Statut</div>
-                    @php $sc = $formateur->statut === 'OFPPT' ? 'indigo' : ($formateur->statut === 'Vacataire' ? 'amber' : 'gray'); @endphp
-                    <span class="badge badge-{{ $sc }}">{{ $formateur->statut }}</span>
+                    <x-badge :color="$statutColors[$formateur->statut] ?? 'gray'">{{ $formateur->statut }}</x-badge>
                 </div>
                 <div class="detail-field">
                     <div class="detail-field-label">Pôle d'affectation</div>
@@ -53,7 +56,7 @@
                     <div class="detail-field-label">Mutualisé</div>
                     <div class="detail-field-value">
                         @if($formateur->mutualise)
-                            <span class="badge badge-amber">Oui</span>
+                            <x-badge color="amber">Oui</x-badge>
                             @if($formateur->efp_mutualise) — EFP : {{ $formateur->efp_mutualise }} @endif
                         @else Non @endif
                     </div>
@@ -106,7 +109,7 @@
                         </td>
                         <td>
                             @if($aff->mode)
-                                <span class="badge badge-{{ $aff->mode === 'Résidentiel' ? 'indigo' : 'amber' }}">{{ $aff->mode }}</span>
+                                <x-badge :color="$aff->mode === 'Résidentiel' ? 'indigo' : 'amber'">{{ $aff->mode }}</x-badge>
                             @else <span class="text-muted">—</span> @endif
                         </td>
                         <td>{{ $aff->mh_affecte ? $aff->mh_affecte.'h' : '—' }}</td>

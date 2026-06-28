@@ -18,51 +18,48 @@
             <h1 class="page-title">Notes</h1>
             <p class="page-subtitle">{{ $items->total() }} note(s) enregistrée(s)</p>
         </div>
-        <div class="page-header-actions">
-            <a href="{{ route('web.notes.create') }}" class="btn btn-primary">+ Saisir une note</a>
-        </div>
     </div>
 
     <form method="GET" action="{{ route('web.notes.index') }}">
         <div class="filter-bar">
             <div class="filter-group">
-                <label class="filter-label">Stagiaire (CEF)</label>
-                <input type="text" name="stagiaire_cef" class="filter-input" placeholder="ex. 123456"
-                       value="{{ request('stagiaire_cef') }}" style="min-width:120px">
+                <label class="filter-label" for="filter-stagiaire-cef">Stagiaire (CEF)</label>
+                <input id="filter-stagiaire-cef" type="text" name="stagiaire_cef" class="filter-input"
+                       placeholder="ex. 123456" value="{{ request('stagiaire_cef') }}" style="min-width:120px">
             </div>
             <div class="filter-group">
-                <label class="filter-label">Séance (ID)</label>
-                <input type="number" name="seance_id" class="filter-input" placeholder="ID séance"
-                       value="{{ request('seance_id') }}" style="min-width:100px">
+                <label class="filter-label" for="filter-seance-id">Séance (ID)</label>
+                <input id="filter-seance-id" type="number" name="seance_id" class="filter-input"
+                       placeholder="ID séance" value="{{ request('seance_id') }}" style="min-width:100px">
             </div>
             <div class="filter-group">
-                <label class="filter-label">Type</label>
-                <select name="type" class="filter-select">
+                <label class="filter-label" for="filter-type">Type</label>
+                <select id="filter-type" name="type" class="filter-select">
                     <option value="">Tous types</option>
-                    <option value="cc"   {{ request('type') === 'cc'   ? 'selected' : '' }}>CC</option>
-                    <option value="efm"  {{ request('type') === 'efm'  ? 'selected' : '' }}>EFM</option>
-                    <option value="tp"   {{ request('type') === 'tp'   ? 'selected' : '' }}>TP</option>
-                    <option value="th"   {{ request('type') === 'th'   ? 'selected' : '' }}>TH</option>
-                    <option value="syn"  {{ request('type') === 'syn'  ? 'selected' : '' }}>SYN</option>
-                    <option value="exam" {{ request('type') === 'exam' ? 'selected' : '' }}>Examen</option>
+                    <option value="cc"   @selected(request('type') === 'cc')>CC</option>
+                    <option value="efm"  @selected(request('type') === 'efm')>EFM</option>
+                    <option value="tp"   @selected(request('type') === 'tp')>TP</option>
+                    <option value="th"   @selected(request('type') === 'th')>TH</option>
+                    <option value="syn"  @selected(request('type') === 'syn')>SYN</option>
+                    <option value="exam" @selected(request('type') === 'exam')>Examen</option>
                 </select>
             </div>
             <div class="filter-group">
-                <label class="filter-label">Décision</label>
-                <select name="decision" class="filter-select">
+                <label class="filter-label" for="filter-decision">Décision</label>
+                <select id="filter-decision" name="decision" class="filter-select">
                     <option value="">Toutes</option>
-                    <option value="Admis"      {{ request('decision') === 'Admis'      ? 'selected' : '' }}>Admis</option>
-                    <option value="Redoublant" {{ request('decision') === 'Redoublant' ? 'selected' : '' }}>Redoublant</option>
-                    <option value="Abandon"    {{ request('decision') === 'Abandon'    ? 'selected' : '' }}>Abandon</option>
-                    <option value="Rattrapage" {{ request('decision') === 'Rattrapage' ? 'selected' : '' }}>Rattrapage</option>
+                    <option value="Admis"      @selected(request('decision') === 'Admis')>Admis</option>
+                    <option value="Redoublant" @selected(request('decision') === 'Redoublant')>Redoublant</option>
+                    <option value="Abandon"    @selected(request('decision') === 'Abandon')>Abandon</option>
+                    <option value="Rattrapage" @selected(request('decision') === 'Rattrapage')>Rattrapage</option>
                 </select>
             </div>
             <div class="filter-group">
-                <label class="filter-label">Manquantes</label>
-                <select name="missing" class="filter-select">
+                <label class="filter-label" for="filter-missing">Manquantes</label>
+                <select id="filter-missing" name="missing" class="filter-select">
                     <option value="">Toutes</option>
-                    <option value="1" {{ request('missing') === '1' ? 'selected' : '' }}>Oui</option>
-                    <option value="0" {{ request('missing') === '0' ? 'selected' : '' }}>Non</option>
+                    <option value="1" @selected(request('missing') === '1')>Oui</option>
+                    <option value="0" @selected(request('missing') === '0')>Non</option>
                 </select>
             </div>
             <div class="filter-actions">
@@ -74,12 +71,12 @@
 
     <div class="table-wrap">
         @if($items->isEmpty())
-            <div class="empty-state">
-                <div class="empty-icon">📝</div>
-                <div class="empty-title">Aucune note trouvée</div>
-                <div class="empty-sub">Modifiez vos filtres ou saisissez une nouvelle note.</div>
-            </div>
+            <x-empty-state icon="📝" title="Aucune note trouvée" subtitle="Modifiez vos filtres ou saisissez une nouvelle note." />
         @else
+            @php
+                $typeColors = ['cc' => 'amber', 'efm' => 'navy', 'exam' => 'red', 'tp' => 'indigo', 'th' => 'gray', 'syn' => 'green'];
+                $decColors  = ['Admis' => 'green', 'Redoublant' => 'amber', 'Abandon' => 'red', 'Rattrapage' => 'indigo'];
+            @endphp
             <table>
                 <thead>
                 <tr>
@@ -93,10 +90,6 @@
                 </thead>
                 <tbody>
                 @foreach($items as $note)
-                    @php
-                        $typeC = ['cc'=>'amber','efm'=>'navy','exam'=>'red','tp'=>'indigo','th'=>'gray','syn'=>'green'];
-                        $decC  = ['Admis'=>'green','Redoublant'=>'amber','Abandon'=>'red','Rattrapage'=>'indigo'];
-                    @endphp
                     <tr>
                         <td>
                             @if($note->stagiaire)
@@ -113,7 +106,7 @@
                             <div class="text-muted text-sm">{{ $note->seance?->affectation?->groupe?->code ?? '' }}</div>
                         </td>
                         <td>
-                            <span class="badge badge-{{ $typeC[$note->type] ?? 'gray' }}">{{ strtoupper($note->type ?? '?') }}</span>
+                            <x-badge :color="$typeColors[$note->type] ?? 'gray'">{{ strtoupper($note->type ?? '?') }}</x-badge>
                         </td>
                         <td>
                             @if($note->valeur !== null)
@@ -126,7 +119,7 @@
                         </td>
                         <td>
                             @if($note->decision)
-                                <span class="badge badge-{{ $decC[$note->decision] ?? 'gray' }}">{{ $note->decision }}</span>
+                                <x-badge :color="$decColors[$note->decision] ?? 'gray'">{{ $note->decision }}</x-badge>
                             @else
                                 <span class="text-muted">—</span>
                             @endif

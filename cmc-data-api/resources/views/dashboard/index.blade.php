@@ -65,11 +65,7 @@
                 <a href="{{ route('web.seances.index') }}" class="btn btn-outline btn-sm">Tout voir</a>
             </div>
             @if($recent_seances->isEmpty())
-                <div class="empty-state">
-                    <div class="empty-icon">📅</div>
-                    <div class="empty-title">Aucune séance récente</div>
-                    <div class="empty-sub">Aucune séance sur les 7 derniers jours</div>
-                </div>
+                <x-empty-state icon="📅" title="Aucune séance récente" subtitle="Aucune séance sur les 7 derniers jours." />
             @else
                 <table>
                     <thead>
@@ -82,6 +78,10 @@
                     </thead>
                     <tbody>
                     @foreach($recent_seances as $seance)
+                        @php
+                            $typeColors = ['cours' => 'indigo', 'cc' => 'amber', 'efm' => 'navy', 'exam' => 'red'];
+                            $seanceColor = $typeColors[$seance->type] ?? 'gray';
+                        @endphp
                         <tr>
                             <td>
                                 <a href="{{ route('web.seances.show', $seance) }}" class="table-link">
@@ -96,11 +96,7 @@
                                 {{ $seance->timeRange?->start_time }} – {{ $seance->timeRange?->end_time }}
                             </td>
                             <td>
-                                @php
-                                    $typeColors = ['cours'=>'indigo','cc'=>'amber','efm'=>'navy','exam'=>'red'];
-                                    $color = $typeColors[$seance->type] ?? 'gray';
-                                @endphp
-                                <span class="badge badge-{{ $color }}">{{ strtoupper($seance->type) }}</span>
+                                <x-badge :color="$seanceColor">{{ strtoupper($seance->type) }}</x-badge>
                             </td>
                         </tr>
                     @endforeach
@@ -124,9 +120,9 @@
                             </a>
                         </div>
                         <div style="display:flex; gap:8px; flex-shrink:0">
-                            <span class="badge badge-navy">{{ $pole->formateurs_count }} form.</span>
-                            <span class="badge badge-indigo">{{ $pole->filieres_count }} fil.</span>
-                            <span class="badge badge-gray">{{ $pole->espaces_count }} esp.</span>
+                            <x-badge color="navy">{{ $pole->formateurs_count }} form.</x-badge>
+                            <x-badge color="indigo">{{ $pole->filieres_count }} fil.</x-badge>
+                            <x-badge color="gray">{{ $pole->espaces_count }} esp.</x-badge>
                         </div>
                     </div>
                 @endforeach

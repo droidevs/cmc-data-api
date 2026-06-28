@@ -14,32 +14,33 @@
     <form method="GET" action="{{ route('web.formateurs.index') }}">
         <div class="filter-bar">
             <div class="filter-group">
-                <label class="filter-label">Recherche</label>
-                <input type="text" name="q" class="filter-input" placeholder="Nom, matricule…" value="{{ request('q') }}">
+                <label class="filter-label" for="filter-q">Recherche</label>
+                <input id="filter-q" type="text" name="q" class="filter-input"
+                       placeholder="Nom, matricule…" value="{{ request('q') }}">
             </div>
             <div class="filter-group">
-                <label class="filter-label">Statut</label>
-                <select name="statut" class="filter-select">
+                <label class="filter-label" for="filter-statut">Statut</label>
+                <select id="filter-statut" name="statut" class="filter-select">
                     <option value="">Tous statuts</option>
-                    <option value="OFPPT"       {{ request('statut') === 'OFPPT'       ? 'selected' : '' }}>OFPPT</option>
-                    <option value="Vacataire"   {{ request('statut') === 'Vacataire'   ? 'selected' : '' }}>Vacataire</option>
-                    <option value="Contractuel" {{ request('statut') === 'Contractuel' ? 'selected' : '' }}>Contractuel</option>
+                    <option value="OFPPT"       @selected(request('statut') === 'OFPPT')>OFPPT</option>
+                    <option value="Vacataire"   @selected(request('statut') === 'Vacataire')>Vacataire</option>
+                    <option value="Contractuel" @selected(request('statut') === 'Contractuel')>Contractuel</option>
                 </select>
             </div>
             <div class="filter-group">
-                <label class="filter-label">Mutualisé</label>
-                <select name="mutualise" class="filter-select">
+                <label class="filter-label" for="filter-mutualise">Mutualisé</label>
+                <select id="filter-mutualise" name="mutualise" class="filter-select">
                     <option value="">Tous</option>
-                    <option value="1" {{ request('mutualise') === '1' ? 'selected' : '' }}>Oui</option>
-                    <option value="0" {{ request('mutualise') === '0' ? 'selected' : '' }}>Non</option>
+                    <option value="1" @selected(request('mutualise') === '1')>Oui</option>
+                    <option value="0" @selected(request('mutualise') === '0')>Non</option>
                 </select>
             </div>
             <div class="filter-group">
-                <label class="filter-label">Avec affectations</label>
-                <select name="has_affectations" class="filter-select">
+                <label class="filter-label" for="filter-has-affectations">Avec affectations</label>
+                <select id="filter-has-affectations" name="has_affectations" class="filter-select">
                     <option value="">Tous</option>
-                    <option value="1" {{ request('has_affectations') === '1' ? 'selected' : '' }}>Oui</option>
-                    <option value="0" {{ request('has_affectations') === '0' ? 'selected' : '' }}>Non</option>
+                    <option value="1" @selected(request('has_affectations') === '1')>Oui</option>
+                    <option value="0" @selected(request('has_affectations') === '0')>Non</option>
                 </select>
             </div>
             <div class="filter-actions">
@@ -51,17 +52,16 @@
 
     <div class="table-wrap">
         @if($items->isEmpty())
-            <div class="empty-state">
-                <div class="empty-icon">👤</div>
-                <div class="empty-title">Aucun formateur trouvé</div>
-                <div class="empty-sub">Modifiez vos critères de recherche.</div>
-            </div>
+            <x-empty-state icon="👤" title="Aucun formateur trouvé" subtitle="Modifiez vos critères de recherche." />
         @else
+            @php
+                $statutColors = ['OFPPT' => 'indigo', 'Vacataire' => 'amber', 'Contractuel' => 'gray'];
+            @endphp
             <table>
                 <thead>
                 <tr>
                     <th>Matricule</th>
-                    <th>Nom & Prénom</th>
+                    <th>Nom &amp; Prénom</th>
                     <th>Pôle</th>
                     <th>Statut</th>
                     <th>MHS</th>
@@ -92,14 +92,13 @@
                             @endif
                         </td>
                         <td>
-                            @php $sc = $formateur->statut === 'OFPPT' ? 'indigo' : ($formateur->statut === 'Vacataire' ? 'amber' : 'gray'); @endphp
-                            <span class="badge badge-{{ $sc }}">{{ $formateur->statut }}</span>
+                            <x-badge :color="$statutColors[$formateur->statut] ?? 'gray'">{{ $formateur->statut }}</x-badge>
                         </td>
                         <td>{{ $formateur->mhs }}h</td>
                         <td class="text-muted" style="font-size:12px">{{ $formateur->email_edu ?? '—' }}</td>
                         <td>
                             @if($formateur->mutualise)
-                                <span class="badge badge-amber">Oui</span>
+                                <x-badge color="amber">Oui</x-badge>
                             @else
                                 <span class="text-muted">—</span>
                             @endif

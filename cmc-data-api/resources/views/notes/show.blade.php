@@ -13,7 +13,7 @@
 
 @section('content')
     @php
-        $typeC = ['cc'=>'amber','efm'=>'navy','exam'=>'red','tp'=>'indigo','th'=>'gray','syn'=>'green'];
+        $typeC = ['cc'=>'amber','efm'=>'navy'];
         $decC  = ['Admis'=>'green','Redoublant'=>'amber','Abandon'=>'red','Rattrapage'=>'indigo'];
     @endphp
 
@@ -30,8 +30,8 @@
         </div>
         <div class="page-header-actions">
             @if($note->type)
-                <span class="badge badge-{{ $typeC[$note->type] ?? 'gray' }}" style="font-size:13px;padding:6px 14px">
-                    {{ strtoupper($note->type) }}
+                <span class="badge badge-{{ $typeC[$note->type?->value] ?? 'gray' }}" style="font-size:13px;padding:6px 14px">
+                    {{ strtoupper($note->type?->label()) }}
                 </span>
             @endif
             <a href="{{ route('web.notes.edit', $note) }}" class="btn btn-outline">Éditer</a>

@@ -109,7 +109,7 @@ abstract class BaseService
 
     protected function applyFilter(Request $request, Builder $query): void
     {
-        (new ($this->filterClass())($request))->apply($query);
+        new ($this->filterClass())($request)->apply($query);
     }
 
     protected function applyRequestedIncludes(Request $request, Builder $query): void

@@ -79,8 +79,8 @@
                     <tbody>
                     @foreach($recent_seances as $seance)
                         @php
-                            $typeColors = ['cours' => 'indigo', 'cc' => 'amber', 'efm' => 'navy', 'exam' => 'red'];
-                            $seanceColor = $typeColors[$seance->type] ?? 'gray';
+                            $typeColors = ['cours' => 'indigo', 'cc' => 'amber', 'efm' => 'navy'];
+                            $seanceColor = $typeColors[$seance->type?->value] ?? 'gray';
                         @endphp
                         <tr>
                             <td>
@@ -96,7 +96,7 @@
                                 {{ $seance->timeRange?->start_time }} – {{ $seance->timeRange?->end_time }}
                             </td>
                             <td>
-                                <x-badge :color="$seanceColor">{{ strtoupper($seance->type) }}</x-badge>
+                                <x-badge :color="$seanceColor">{{ strtoupper($seance->type?->label()) }}</x-badge>
                             </td>
                         </tr>
                     @endforeach

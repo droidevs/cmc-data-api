@@ -125,8 +125,8 @@
                         </td>
                         <td>
                             @php $typeC=['cours'=>'indigo','cc'=>'amber','efm'=>'navy','exam'=>'red']; @endphp
-                            <span class="badge badge-{{ $typeC[$seance->type] ?? 'gray' }}">
-                                {{ strtoupper($seance->type) }}
+                            <span class="badge badge-{{ $typeC[$seance->type?->value] ?? 'gray' }}">
+                                {{ strtoupper($seance->type?->label()) }}
                             </span>
                         </td>
                         <td class="text-muted">

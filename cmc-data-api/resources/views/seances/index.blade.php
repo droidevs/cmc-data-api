@@ -23,7 +23,6 @@
                     <option value="cours" {{ request('type') === 'cours' ? 'selected' : '' }}>Cours</option>
                     <option value="cc"    {{ request('type') === 'cc'    ? 'selected' : '' }}>CC</option>
                     <option value="efm"   {{ request('type') === 'efm'   ? 'selected' : '' }}>EFM</option>
-                    <option value="exam"  {{ request('type') === 'exam'  ? 'selected' : '' }}>Examen</option>
                 </select>
             </div>
             <div class="filter-group">

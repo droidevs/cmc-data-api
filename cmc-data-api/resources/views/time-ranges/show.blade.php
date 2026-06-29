@@ -68,7 +68,7 @@
                             <div style="font-weight:600;font-size:13px">{{ $seance->affectation?->module?->libelle ?? '—' }}</div>
                             <div class="text-muted text-sm">{{ $seance->affectation?->groupe?->code ?? '' }}</div>
                         </td>
-                        <td><span class="badge badge-{{ $typeC[$seance->type] ?? 'gray' }}">{{ strtoupper($seance->type) }}</span></td>
+                        <td><span class="badge badge-{{ $typeC[$seance->type?->value] ?? 'gray' }}">{{ strtoupper($seance->type?->label()) }}</span></td>
                         <td class="text-muted" style="font-size:12.5px">{{ $seance->espace?->libelle ?? '—' }}</td>
                         <td><a href="{{ route('web.seances.show', $seance) }}" class="btn btn-outline btn-sm">Voir</a></td>
                     </tr>

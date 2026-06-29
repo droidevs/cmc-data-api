@@ -40,7 +40,7 @@ abstract class QueryFilter
 
     public static function filterKeys(): array
     {
-        return array_keys((new static)->filters());
+        return array_keys((new static(new Request))->filters());
     }
 
     public function apply(Builder $builder): Builder

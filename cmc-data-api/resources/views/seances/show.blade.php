@@ -12,7 +12,7 @@
 @endsection
 
 @section('content')
-    @php $typeC = ['cours'=>'indigo','cc'=>'amber','efm'=>'navy','exam'=>'red']; @endphp
+    @php $typeC = ['cours'=>'indigo','cc'=>'amber','efm'=>'navy']; @endphp
 
     <div class="page-header">
         <div>
@@ -27,8 +27,9 @@
             </p>
         </div>
         <div class="page-header-actions">
-            <span class="badge badge-{{ $typeC[$seance->type] ?? 'gray' }}"
-                  style="font-size:13px;padding:6px 14px">{{ strtoupper($seance->type) }}</span>
+            <span class="badge badge-{{ $typeC[$seance->type?->value] ?? 'gray' }}"
+                  style="font-size:13px;padding:6px 14px">{{ strtoupper($seance->type?->label() ?? '?') }}
+            </span>
             <a href="{{ route('web.seances.edit', $seance) }}" class="btn btn-outline">Éditer</a>
             <form method="POST" action="{{ route('web.seances.destroy', $seance) }}"
                   onsubmit="return confirm('Supprimer cette séance et ses notes ?')">
@@ -49,8 +50,8 @@
                 <div class="detail-field">
                     <div class="detail-field-label">Type</div>
                     <div class="detail-field-value">
-                        <span class="badge badge-{{ $typeC[$seance->type] ?? 'gray' }}">
-                            {{ strtoupper($seance->type) }}
+                        <span class="badge badge-{{ $typeC[$seance->type?->value] ?? 'gray' }}"
+                              style="font-size:13px;padding:6px 14px">{{ strtoupper($seance->type?->label() ?? '?') }}
                         </span>
                     </div>
                 </div>
@@ -142,8 +143,10 @@
                             @else {{ $note->stagiaire_cef }} @endif
                         </td>
                         <td>
-                            @php $tC=['cc'=>'amber','efm'=>'navy','exam'=>'red','tp'=>'indigo','th'=>'gray','syn'=>'green']; @endphp
-                            <span class="badge badge-{{ $tC[$note->type] ?? 'gray' }}">{{ strtoupper($note->type ?? '?') }}</span>
+                            @php $tC=['cours' => 'indigo','cc'=>'amber','efm'=>'navy','th'=>'gray','syn'=>'green']; @endphp
+                            <span class="badge badge-{{ $typeC[$seance->type?->value] ?? 'gray' }}"
+                                  style="font-size:13px;padding:6px 14px">{{ strtoupper($seance->type?->label() ?? '?') }}
+                            </span>
                         </td>
                         <td>
                             @if($note->valeur !== null)

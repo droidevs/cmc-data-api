@@ -92,7 +92,7 @@
                             @endif
                         </td>
                         <td>
-                            <x-badge :color="$statutColors[$formateur->statut] ?? 'gray'">{{ $formateur->statut }}</x-badge>
+                            <x-badge :color="$statutColors[$formateur->statut?->value] ?? 'gray'">{{ $formateur->statut?->label() }}</x-badge>
                         </td>
                         <td>{{ $formateur->mhs }}h</td>
                         <td class="text-muted" style="font-size:12px">{{ $formateur->email_edu ?? '—' }}</td>

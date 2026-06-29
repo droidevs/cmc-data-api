@@ -98,7 +98,7 @@
             <x-empty-state icon="📝" title="Aucune note trouvée" subtitle="Modifiez vos filtres ou saisissez une nouvelle note." />
         @else
             @php
-                $typeColors = ['cc' => 'amber', 'efm' => 'navy', 'exam' => 'red', 'tp' => 'indigo', 'th' => 'gray', 'syn' => 'green'];
+                $typeColors = ['cc' => 'amber', 'efm' => 'navy'];
                 $decColors  = ['Admis' => 'green', 'Redoublant' => 'amber', 'Abandon' => 'red', 'Rattrapage' => 'indigo'];
             @endphp
             <table>
@@ -130,7 +130,7 @@
                             <div class="text-muted text-sm">{{ $note->seance?->affectation?->groupe?->code ?? '' }}</div>
                         </td>
                         <td>
-                            <x-badge :color="$typeColors[$note->type] ?? 'gray'">{{ strtoupper($note->type ?? '?') }}</x-badge>
+                            <x-badge :color="$typeColors[$note->type?->value] ?? 'gray'">{{ strtoupper($note->type?->label() ?? '?') }}</x-badge>
                         </td>
                         <td>
                             @if($note->valeur !== null)

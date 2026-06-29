@@ -33,7 +33,7 @@
             <div class="detail-grid thirds">
                 <div class="detail-field">
                     <div class="detail-field-label">Statut</div>
-                    <x-badge :color="$statutColors[$formateur->statut] ?? 'gray'">{{ $formateur->statut }}</x-badge>
+                    <x-badge :color="$statutColors[$formateur->statut?->value] ?? 'gray'">{{ $formateur->statut?->label() }}</x-badge>
                 </div>
                 <div class="detail-field">
                     <div class="detail-field-label">Pôle d'affectation</div>

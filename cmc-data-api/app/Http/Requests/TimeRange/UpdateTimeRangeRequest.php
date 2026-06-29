@@ -25,7 +25,7 @@ class UpdateTimeRangeRequest extends FormRequest
                 'sometimes',
                 'date_format:H:i',
                 function (string $attribute, mixed $value, \Closure $fail) use ($timeRange) {
-                    $start = $this->input('start_time', $timeRange?->start_time?->format('H:i'));
+                    $start = $this->input('start_time', $timeRange?->start_time ? substr((string) $timeRange->start_time, 0, 5) : null);
 
                     if ($start && $value <= $start) {
                         $fail('L\'heure de fin doit être après l\'heure de début.');

@@ -19,6 +19,12 @@
                        placeholder="Nom, matricule…" value="{{ request('q') }}">
             </div>
             <div class="filter-group">
+                <label class="filter-label" for="filter-pole">Pôle</label>
+                <select id="filter-pole" name="pole_id" class="filter-select">
+                    <option value="">Tous les pôles</option>
+                </select>
+            </div>
+            <div class="filter-group">
                 <label class="filter-label" for="filter-statut">Statut</label>
                 <select id="filter-statut" name="statut" class="filter-select">
                     <option value="">Tous statuts</option>
@@ -115,3 +121,25 @@
         @endif
     </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const poleSelect = document.getElementById('filter-pole');
+    const selectedPole = '{{ request('pole_id') }}';
+
+    fetch('/api/v1/hierarchy/poles')
+        .then(res => res.json())
+        .then(data => {
+            data.forEach(pole => {
+                const opt = document.createElement('option');
+                opt.value = pole.id;
+                opt.textContent = pole.libelle;
+                if (pole.id == selectedPole) opt.selected = true;
+                poleSelect.appendChild(opt);
+            });
+        });
+});
+</script>
+@endpush
+

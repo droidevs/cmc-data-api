@@ -88,6 +88,7 @@ Route::prefix('v1')->group(function () {
         Route::get('modules', [HierarchyController::class, 'getModules']);
         Route::get('stagiaires', [HierarchyController::class, 'getStagiaires']);
         Route::get('seances', [HierarchyController::class, 'getSeances']);
+        Route::get('niveaux', [HierarchyController::class, 'getNiveaux']);
         Route::get('resolve/stagiaire/{cef}', [HierarchyController::class, 'resolveStagiaire']);
         Route::get('resolve/groupe/{id}', [HierarchyController::class, 'resolveGroupe']);
     });

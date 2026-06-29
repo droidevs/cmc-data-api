@@ -24,14 +24,16 @@
                        placeholder="ex. Digital et IA…" value="{{ request('secteur') }}" style="min-width:160px">
             </div>
             <div class="filter-group">
-                <label class="filter-label">Pôle (ID)</label>
-                <input type="number" name="pole_id" class="filter-input" placeholder="ID pôle"
-                       value="{{ request('pole_id') }}" style="min-width:90px">
+                <label class="filter-label" for="filter-pole">Pôle</label>
+                <select id="filter-pole" name="pole_id" class="filter-select">
+                    <option value="">Tous les pôles</option>
+                </select>
             </div>
             <div class="filter-group">
-                <label class="filter-label">Niveau (ID)</label>
-                <input type="number" name="niveau_id" class="filter-input" placeholder="ID niveau"
-                       value="{{ request('niveau_id') }}" style="min-width:90px">
+                <label class="filter-label" for="filter-niveau">Niveau</label>
+                <select id="filter-niveau" name="niveau_id" class="filter-select">
+                    <option value="">Tous les niveaux</option>
+                </select>
             </div>
             <div class="filter-actions">
                 <button type="submit" class="btn btn-primary">Filtrer</button>
@@ -103,3 +105,42 @@
         @endif
     </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const poleSelect = document.getElementById('filter-pole');
+    const niveauSelect = document.getElementById('filter-niveau');
+
+    const selectedPole = '{{ request('pole_id') }}';
+    const selectedNiveau = '{{ request('niveau_id') }}';
+
+    // Fetch and populate poles
+    fetch('/api/v1/hierarchy/poles')
+        .then(res => res.json())
+        .then(data => {
+            data.forEach(pole => {
+                const opt = document.createElement('option');
+                opt.value = pole.id;
+                opt.textContent = pole.libelle;
+                if (pole.id == selectedPole) opt.selected = true;
+                poleSelect.appendChild(opt);
+            });
+        });
+
+    // Fetch and populate niveaux
+    fetch('/api/v1/hierarchy/niveaux')
+        .then(res => res.json())
+        .then(data => {
+            data.forEach(niveau => {
+                const opt = document.createElement('option');
+                opt.value = niveau.id;
+                opt.textContent = niveau.libelle;
+                if (niveau.id == selectedNiveau) opt.selected = true;
+                niveauSelect.appendChild(opt);
+            });
+        });
+});
+</script>
+@endpush
+

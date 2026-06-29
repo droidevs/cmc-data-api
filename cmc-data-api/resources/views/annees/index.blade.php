@@ -14,19 +14,24 @@
     <form method="GET" action="{{ route('web.annees.index') }}">
         <div class="filter-bar">
             <div class="filter-group">
-                <label class="filter-label">Filière (code)</label>
-                <input type="text" name="filiere_code" class="filter-input" placeholder="ex. DIA_DEV_TS"
-                       value="{{ request('filiere_code') }}" style="min-width:140px">
+                <label class="filter-label" for="filter-pole">Pôle</label>
+                <select id="filter-pole" name="pole_id" class="filter-select">
+                    <option value="">Tous les pôles</option>
+                </select>
             </div>
             <div class="filter-group">
-                <label class="filter-label">Année (libellé)</label>
-                <input type="number" name="libelle" class="filter-input" placeholder="1, 2…"
-                       value="{{ request('libelle') }}" style="min-width:90px">
+                <label class="filter-label" for="filter-filiere">Filière</label>
+                <select id="filter-filiere" name="filiere_code" class="filter-select" disabled>
+                    <option value="">Toutes les filières</option>
+                </select>
             </div>
             <div class="filter-group">
-                <label class="filter-label">Pôle (ID)</label>
-                <input type="number" name="pole_id" class="filter-input" placeholder="ID pôle"
-                       value="{{ request('pole_id') }}" style="min-width:90px">
+                <label class="filter-label" for="filter-libelle">Année</label>
+                <select id="filter-libelle" name="libelle" class="filter-select">
+                    <option value="">Toutes les années</option>
+                    <option value="1" @selected(request('libelle') === '1')>1ère année</option>
+                    <option value="2" @selected(request('libelle') === '2')>2ème année</option>
+                </select>
             </div>
             <div class="filter-actions">
                 <button type="submit" class="btn btn-primary">Filtrer</button>
@@ -90,3 +95,51 @@
         @endif
     </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const poleSelect = document.getElementById('filter-pole');
+    const filiereSelect = document.getElementById('filter-filiere');
+
+    const selectedPole = '{{ request('pole_id') }}';
+    const selectedFiliere = '{{ request('filiere_code') }}';
+
+    // Fetch and populate poles
+    fetch('/api/v1/hierarchy/poles')
+        .then(res => res.json())
+        .then(data => {
+            data.forEach(pole => {
+                const opt = document.createElement('option');
+                opt.value = pole.id;
+                opt.textContent = pole.libelle;
+                if (pole.id == selectedPole) opt.selected = true;
+                poleSelect.appendChild(opt);
+            });
+            if (selectedPole) {
+                poleSelect.dispatchEvent(new Event('change'));
+            }
+        });
+
+    poleSelect.addEventListener('change', function() {
+        filiereSelect.innerHTML = '<option value="">Toutes les filières</option>';
+        filiereSelect.disabled = !this.value;
+
+        if (!this.value) return;
+
+        fetch(`/api/v1/hierarchy/filieres?pole_id=${this.value}`)
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(filiere => {
+                    const opt = document.createElement('option');
+                    opt.value = filiere.code_filiere;
+                    opt.textContent = filiere.libelle;
+                    if (filiere.code_filiere === selectedFiliere) opt.selected = true;
+                    filiereSelect.appendChild(opt);
+                });
+            });
+    });
+});
+</script>
+@endpush
+

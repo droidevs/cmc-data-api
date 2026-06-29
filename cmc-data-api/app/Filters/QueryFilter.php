@@ -48,7 +48,7 @@ abstract class QueryFilter
         $this->builder = $builder;
 
         foreach ($this->filters() as $param => $method) {
-            if (! $this->request->filled($param) && ! $this->request->has($param)) {
+            if (! $this->request->filled($param)) {
                 continue;
             }
 
@@ -56,12 +56,7 @@ abstract class QueryFilter
                 continue;
             }
 
-            $value = $this->request->query($param);
-
-            // Allow explicit "false"/"0" for boolean filters to pass has() check.
-            if ($value === null && ! $this->request->filled($param)) {
-                continue;
-            }
+            $value = $this->request->input($param);
 
             $this->{$method}($value);
         }
@@ -132,7 +127,7 @@ abstract class QueryFilter
      */
     protected function applySort(): void
     {
-        $sortParam = (string) $this->request->query('sort', '');
+        $sortParam = (string) $this->request->input('sort', '');
         if ($sortParam === '') {
             return;
         }

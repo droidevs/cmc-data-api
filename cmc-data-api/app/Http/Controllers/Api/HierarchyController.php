@@ -8,6 +8,7 @@ use App\Models\Annee;
 use App\Models\Filiere;
 use App\Models\Groupe;
 use App\Models\Module;
+use App\Models\Niveau;
 use App\Models\Pole;
 use App\Models\Seance;
 use App\Models\Stagiaire;
@@ -210,5 +211,11 @@ class HierarchyController
             'filiere_code' => $filiere?->code_filiere,
             'pole_id' => $filiere?->pole_id,
         ]);
+    }
+
+    public function getNiveaux(): JsonResponse
+    {
+        $niveaux = Niveau::orderBy('libelle')->get(['id', 'libelle']);
+        return response()->json($niveaux);
     }
 }

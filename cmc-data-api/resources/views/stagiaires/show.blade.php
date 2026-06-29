@@ -152,7 +152,7 @@
                     <tr>
                         <td>{{ $note->seance?->affectation?->module?->libelle ?? '—' }}</td>
                         <td>
-                            <x-badge :color="$typeColors[$note->type] ?? 'gray'">{{ strtoupper($note->type ?? '?') }}</x-badge>
+                            <x-badge :color="$typeColors[$note->type?->value] ?? 'gray'">{{ strtoupper($note->type?->value ?? '?') }}</x-badge>
                         </td>
                         <td>
                             @if($note->valeur !== null)

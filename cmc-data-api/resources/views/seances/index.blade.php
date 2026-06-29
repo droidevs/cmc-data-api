@@ -118,9 +118,9 @@
                             </div>
                         </td>
                         <td>
-                            <span class="badge badge-{{ $typeC[$seance->type] ?? 'gray' }}">
-                                {{ strtoupper($seance->type) }}
-                            </span>
+                            <x-badge :color="$typeC[$seance->type?->value] ?? 'gray'">
+                                {{ strtoupper($seance->type?->label()) }}
+                            </x-badge>
                         </td>
                         <td class="text-muted">
                             {{ $seance->timeRange?->start_time }}

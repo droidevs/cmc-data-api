@@ -31,7 +31,7 @@ class HierarchyController
             $query->where('pole_id', $request->query('pole_id'));
         }
 
-        $filieres = $query->orderBy('libelle')->get(['code_filiere', 'libelle']);
+        $filieres = $query->orderBy('libelle')->get(['code_filiere', 'libelle', 'pole_id']);
         return response()->json($filieres);
     }
 

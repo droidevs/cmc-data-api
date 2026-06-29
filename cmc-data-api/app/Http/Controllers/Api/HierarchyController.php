@@ -41,15 +41,16 @@ class HierarchyController
 
         if ($request->has('filiere_code')) {
             $query->where('filiere_code', $request->query('filiere_code'));
+        } elseif ($request->has('pole_id')) {
+            $query->whereHas('filiere', fn($q) => $q->where('pole_id', $request->query('pole_id')));
         }
 
         $annees = $query->orderBy('libelle')->get(['id', 'libelle', 'filiere_code']);
-        
-        // Map to include the human label accessor safely
+
         $formatted = $annees->map(fn ($annee) => [
-            'id' => $annee->id,
-            'libelle' => $annee->libelle,
-            'label' => $annee->label, // Calls modern label accessor
+            'id'           => $annee->id,
+            'libelle'      => $annee->libelle,
+            'label'        => $annee->label,
             'filiere_code' => $annee->filiere_code
         ]);
 

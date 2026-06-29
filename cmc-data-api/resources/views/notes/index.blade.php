@@ -30,19 +30,19 @@
             </div>
             <div class="filter-group">
                 <label class="filter-label" for="filter-filiere">Filière</label>
-                <select id="filter-filiere" name="filiere_code" class="filter-select" disabled>
+                <select id="filter-filiere" name="filiere_code" class="filter-select">
                     <option value="">Toutes les filières</option>
                 </select>
             </div>
             <div class="filter-group">
                 <label class="filter-label" for="filter-annee">Année</label>
-                <select id="filter-annee" name="annee_id" class="filter-select" disabled>
+                <select id="filter-annee" name="annee_id" class="filter-select">
                     <option value="">Toutes les années</option>
                 </select>
             </div>
             <div class="filter-group">
                 <label class="filter-label" for="filter-groupe">Groupe</label>
-                <select id="filter-groupe" name="groupe_id" class="filter-select" disabled>
+                <select id="filter-groupe" name="groupe_id" class="filter-select">
                     <option value="">Tous les groupes</option>
                 </select>
             </div>
@@ -166,100 +166,90 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const poleSelect = document.getElementById('filter-pole');
+document.addEventListener('DOMContentLoaded', function () {
+    const C = window.CMCCascade;
+    const poleSelect    = document.getElementById('filter-pole');
     const filiereSelect = document.getElementById('filter-filiere');
-    const anneeSelect = document.getElementById('filter-annee');
-    const groupeSelect = document.getElementById('filter-groupe');
+    const anneeSelect   = document.getElementById('filter-annee');
+    const groupeSelect  = document.getElementById('filter-groupe');
 
-    const selectedPole = '{{ request('pole_id') }}';
-    const selectedFiliere = '{{ request('filiere_code') }}';
-    const selectedAnnee = '{{ request('annee_id') }}';
-    const selectedGroupe = '{{ request('groupe_id') }}';
+    const selPole    = '{{ request('pole_id') }}';
+    const selFiliere = '{{ request('filiere_code') }}';
+    const selAnnee   = '{{ request('annee_id') }}';
+    const selGroupe  = '{{ request('groupe_id') }}';
 
-    // Fetch and populate poles
-    fetch('/api/v1/hierarchy/poles')
-        .then(res => res.json())
-        .then(data => {
-            data.forEach(pole => {
-                const opt = document.createElement('option');
-                opt.value = pole.id;
-                opt.textContent = pole.libelle;
-                if (pole.id == selectedPole) opt.selected = true;
-                poleSelect.appendChild(opt);
-            });
-            if (selectedPole) {
-                poleSelect.dispatchEvent(new Event('change'));
-            }
+    /* ── boot: load poles, then restore downstream in parallel ── */
+    C.json('/api/v1/hierarchy/poles').then(function (poles) {
+        C.populate(poleSelect, poles, 'id', 'libelle', 'Tous les pôles', selPole);
+        if (selPole) bootDownstream();
+    });
+
+    function bootDownstream() {
+        const poleId = poleSelect.value;
+        if (!poleId) return;
+        Promise.all([
+            C.json('/api/v1/hierarchy/filieres?pole_id=' + poleId),
+            C.json('/api/v1/hierarchy/annees?pole_id='   + poleId),
+            C.json('/api/v1/hierarchy/groupes?pole_id='  + poleId),
+        ]).then(function (_ref) {
+            var filieres = _ref[0], annees = _ref[1], groupes = _ref[2];
+            C.populate(filiereSelect, filieres, 'code_filiere', 'libelle',  'Toutes les filières', selFiliere);
+            C.populate(anneeSelect,   annees,   'id',           'label',    'Toutes les années',   selAnnee);
+            C.populate(groupeSelect,  groupes,  'id',           'code',     'Tous les groupes',    selGroupe);
         });
+    }
 
-    poleSelect.addEventListener('change', function() {
-        filiereSelect.innerHTML = '<option value="">Toutes les filières</option>';
-        filiereSelect.disabled = !this.value;
-        anneeSelect.innerHTML = '<option value="">Toutes les années</option>';
-        anneeSelect.disabled = true;
-        groupeSelect.innerHTML = '<option value="">Tous les groupes</option>';
-        groupeSelect.disabled = true;
-
-        if (!this.value) return;
-
-        fetch(`/api/v1/hierarchy/filieres?pole_id=${this.value}`)
-            .then(res => res.json())
-            .then(data => {
-                data.forEach(filiere => {
-                    const opt = document.createElement('option');
-                    opt.value = filiere.code_filiere;
-                    opt.textContent = filiere.libelle;
-                    if (filiere.code_filiere === selectedFiliere) opt.selected = true;
-                    filiereSelect.appendChild(opt);
-                });
-                if (selectedFiliere) {
-                    filiereSelect.dispatchEvent(new Event('change'));
-                }
-            });
+    /* ── Pôle changed: fetch all 3 downstream levels in parallel ── */
+    poleSelect.addEventListener('change', function () {
+        var poleId = this.value;
+        C.reset(filiereSelect, 'Toutes les filières');
+        C.reset(anneeSelect,   'Toutes les années');
+        C.reset(groupeSelect,  'Tous les groupes');
+        if (!poleId) return;
+        Promise.all([
+            C.json('/api/v1/hierarchy/filieres?pole_id=' + poleId),
+            C.json('/api/v1/hierarchy/annees?pole_id='   + poleId),
+            C.json('/api/v1/hierarchy/groupes?pole_id='  + poleId),
+        ]).then(function (_ref) {
+            var filieres = _ref[0], annees = _ref[1], groupes = _ref[2];
+            C.populate(filiereSelect, filieres, 'code_filiere', 'libelle', 'Toutes les filières', selFiliere);
+            C.populate(anneeSelect,   annees,   'id',           'label',   'Toutes les années',   selAnnee);
+            C.populate(groupeSelect,  groupes,  'id',           'code',    'Tous les groupes',    selGroupe);
+        });
     });
 
-    filiereSelect.addEventListener('change', function() {
-        anneeSelect.innerHTML = '<option value="">Toutes les années</option>';
-        anneeSelect.disabled = !this.value;
-        groupeSelect.innerHTML = '<option value="">Tous les groupes</option>';
-        groupeSelect.disabled = true;
-
-        if (!this.value) return;
-
-        fetch(`/api/v1/hierarchy/annees?filiere_code=${this.value}`)
-            .then(res => res.json())
-            .then(data => {
-                data.forEach(annee => {
-                    const opt = document.createElement('option');
-                    opt.value = annee.id;
-                    opt.textContent = annee.label;
-                    if (annee.id == selectedAnnee) opt.selected = true;
-                    anneeSelect.appendChild(opt);
-                });
-                if (selectedAnnee) {
-                    anneeSelect.dispatchEvent(new Event('change'));
-                }
-            });
+    /* ── Filière changed: fetch annees + groupes in parallel ── */
+    filiereSelect.addEventListener('change', function () {
+        var filiereCode = this.value;
+        var poleId      = poleSelect.value;
+        C.reset(anneeSelect,  'Toutes les années');
+        C.reset(groupeSelect, 'Tous les groupes');
+        var anneesUrl  = filiereCode ? '/api/v1/hierarchy/annees?filiere_code='   + filiereCode
+                                     : (poleId ? '/api/v1/hierarchy/annees?pole_id='    + poleId : null);
+        var groupesUrl = filiereCode ? '/api/v1/hierarchy/groupes?filiere_code=' + filiereCode
+                                     : (poleId ? '/api/v1/hierarchy/groupes?pole_id='   + poleId : null);
+        if (!anneesUrl) return;
+        Promise.all([ C.json(anneesUrl), C.json(groupesUrl) ]).then(function (_ref) {
+            var annees = _ref[0], groupes = _ref[1];
+            C.populate(anneeSelect,  annees,  'id', 'label', 'Toutes les années',  selAnnee);
+            C.populate(groupeSelect, groupes, 'id', 'code',  'Tous les groupes',   selGroupe);
+        });
     });
 
-    anneeSelect.addEventListener('change', function() {
-        groupeSelect.innerHTML = '<option value="">Tous les groupes</option>';
-        groupeSelect.disabled = !this.value;
-
-        if (!this.value) return;
-
-        fetch(`/api/v1/hierarchy/groupes?annee_id=${this.value}`)
-            .then(res => res.json())
-            .then(data => {
-                data.forEach(groupe => {
-                    const opt = document.createElement('option');
-                    opt.value = groupe.id;
-                    opt.textContent = groupe.code;
-                    if (groupe.id == selectedGroupe) opt.selected = true;
-                    groupeSelect.appendChild(opt);
-                });
-            });
+    /* ── Année changed: fetch groupes ── */
+    anneeSelect.addEventListener('change', function () {
+        var anneeId     = this.value;
+        var filiereCode = filiereSelect.value;
+        var poleId      = poleSelect.value;
+        C.reset(groupeSelect, 'Tous les groupes');
+        var groupesUrl = anneeId     ? '/api/v1/hierarchy/groupes?annee_id='     + anneeId
+                       : filiereCode ? '/api/v1/hierarchy/groupes?filiere_code=' + filiereCode
+                       : poleId      ? '/api/v1/hierarchy/groupes?pole_id='      + poleId
+                       : null;
+        if (!groupesUrl) return;
+        C.json(groupesUrl).then(function (groupes) {
+            C.populate(groupeSelect, groupes, 'id', 'code', 'Tous les groupes', selGroupe);
+        });
     });
 });
 </script>

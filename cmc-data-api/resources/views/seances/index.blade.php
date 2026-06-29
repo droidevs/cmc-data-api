@@ -43,19 +43,19 @@
             </div>
             <div class="filter-group">
                 <label class="filter-label" for="sc-filter-filiere">Filière</label>
-                <select id="sc-filter-filiere" name="filiere_code" class="filter-select" disabled>
+                <select id="sc-filter-filiere" name="filiere_code" class="filter-select">
                     <option value="">Toutes les filières</option>
                 </select>
             </div>
             <div class="filter-group">
                 <label class="filter-label" for="sc-filter-annee">Année</label>
-                <select id="sc-filter-annee" name="annee_id" class="filter-select" disabled>
+                <select id="sc-filter-annee" name="annee_id" class="filter-select">
                     <option value="">Toutes les années</option>
                 </select>
             </div>
             <div class="filter-group">
                 <label class="filter-label" for="sc-filter-groupe">Groupe</label>
-                <select id="sc-filter-groupe" name="groupe_id" class="filter-select" disabled>
+                <select id="sc-filter-groupe" name="groupe_id" class="filter-select">
                     <option value="">Tous les groupes</option>
                 </select>
             </div>
@@ -158,69 +158,75 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
+    const C = window.CMCCascade;
     const poleSelect    = document.getElementById('sc-filter-pole');
     const filiereSelect = document.getElementById('sc-filter-filiere');
     const anneeSelect   = document.getElementById('sc-filter-annee');
     const groupeSelect  = document.getElementById('sc-filter-groupe');
 
-    const selectedPole    = '{{ request('pole_id') }}';
-    const selectedFiliere = '{{ request('filiere_code') }}';
-    const selectedAnnee   = '{{ request('annee_id') }}';
-    const selectedGroupe  = '{{ request('groupe_id') }}';
+    const selPole    = '{{ request('pole_id') }}';
+    const selFiliere = '{{ request('filiere_code') }}';
+    const selAnnee   = '{{ request('annee_id') }}';
+    const selGroupe  = '{{ request('groupe_id') }}';
 
-    fetch('/api/v1/hierarchy/poles')
-        .then(r => r.json())
-        .then(data => {
-            data.forEach(pole => {
-                const opt = new Option(pole.libelle, pole.id, false, pole.id == selectedPole);
-                poleSelect.add(opt);
-            });
-            if (selectedPole) poleSelect.dispatchEvent(new Event('change'));
+    C.json('/api/v1/hierarchy/poles').then(function (poles) {
+        C.populate(poleSelect, poles, 'id', 'libelle', 'Tous les pôles', selPole);
+        if (selPole) bootDownstream();
+    });
+
+    function bootDownstream() {
+        var pid = poleSelect.value;
+        if (!pid) return;
+        Promise.all([
+            C.json('/api/v1/hierarchy/filieres?pole_id=' + pid),
+            C.json('/api/v1/hierarchy/annees?pole_id='   + pid),
+            C.json('/api/v1/hierarchy/groupes?pole_id='  + pid),
+        ]).then(function (_ref) {
+            C.populate(filiereSelect, _ref[0], 'code_filiere', 'libelle', 'Toutes les filières', selFiliere);
+            C.populate(anneeSelect,   _ref[1], 'id', 'label',             'Toutes les années',   selAnnee);
+            C.populate(groupeSelect,  _ref[2], 'id', 'code',              'Tous les groupes',    selGroupe);
         });
+    }
 
-    poleSelect.addEventListener('change', function() {
-        filiereSelect.innerHTML = '<option value="">Toutes les filières</option>';
-        filiereSelect.disabled = !this.value;
-        anneeSelect.innerHTML  = '<option value="">Toutes les années</option>';
-        anneeSelect.disabled   = true;
-        groupeSelect.innerHTML = '<option value="">Tous les groupes</option>';
-        groupeSelect.disabled  = true;
-
-        if (!this.value) return;
-        fetch(`/api/v1/hierarchy/filieres?pole_id=${this.value}`)
-            .then(r => r.json())
-            .then(data => {
-                data.forEach(f => filiereSelect.add(new Option(f.libelle, f.code_filiere, false, f.code_filiere === selectedFiliere)));
-                if (selectedFiliere) filiereSelect.dispatchEvent(new Event('change'));
-            });
+    poleSelect.addEventListener('change', function () {
+        var pid = this.value;
+        C.reset(filiereSelect, 'Toutes les filières');
+        C.reset(anneeSelect,   'Toutes les années');
+        C.reset(groupeSelect,  'Tous les groupes');
+        if (!pid) return;
+        Promise.all([
+            C.json('/api/v1/hierarchy/filieres?pole_id=' + pid),
+            C.json('/api/v1/hierarchy/annees?pole_id='   + pid),
+            C.json('/api/v1/hierarchy/groupes?pole_id='  + pid),
+        ]).then(function (_ref) {
+            C.populate(filiereSelect, _ref[0], 'code_filiere', 'libelle', 'Toutes les filières', selFiliere);
+            C.populate(anneeSelect,   _ref[1], 'id', 'label',             'Toutes les années',   selAnnee);
+            C.populate(groupeSelect,  _ref[2], 'id', 'code',              'Tous les groupes',    selGroupe);
+        });
     });
 
-    filiereSelect.addEventListener('change', function() {
-        anneeSelect.innerHTML  = '<option value="">Toutes les années</option>';
-        anneeSelect.disabled   = !this.value;
-        groupeSelect.innerHTML = '<option value="">Tous les groupes</option>';
-        groupeSelect.disabled  = true;
-
-        if (!this.value) return;
-        fetch(`/api/v1/hierarchy/annees?filiere_code=${this.value}`)
-            .then(r => r.json())
-            .then(data => {
-                data.forEach(a => anneeSelect.add(new Option(a.label, a.id, false, a.id == selectedAnnee)));
-                if (selectedAnnee) anneeSelect.dispatchEvent(new Event('change'));
-            });
+    filiereSelect.addEventListener('change', function () {
+        var fc = this.value, pid = poleSelect.value;
+        C.reset(anneeSelect,  'Toutes les années');
+        C.reset(groupeSelect, 'Tous les groupes');
+        var au = fc ? '/api/v1/hierarchy/annees?filiere_code='   + fc : (pid ? '/api/v1/hierarchy/annees?pole_id='    + pid : null);
+        var gu = fc ? '/api/v1/hierarchy/groupes?filiere_code=' + fc : (pid ? '/api/v1/hierarchy/groupes?pole_id='   + pid : null);
+        if (!au) return;
+        Promise.all([ C.json(au), C.json(gu) ]).then(function (_ref) {
+            C.populate(anneeSelect,  _ref[0], 'id', 'label', 'Toutes les années', selAnnee);
+            C.populate(groupeSelect, _ref[1], 'id', 'code',  'Tous les groupes',  selGroupe);
+        });
     });
 
-    anneeSelect.addEventListener('change', function() {
-        groupeSelect.innerHTML = '<option value="">Tous les groupes</option>';
-        groupeSelect.disabled  = !this.value;
-
-        if (!this.value) return;
-        fetch(`/api/v1/hierarchy/groupes?annee_id=${this.value}`)
-            .then(r => r.json())
-            .then(data => {
-                data.forEach(g => groupeSelect.add(new Option(g.code, g.id, false, g.id == selectedGroupe)));
-            });
+    anneeSelect.addEventListener('change', function () {
+        var aid = this.value, fc = filiereSelect.value, pid = poleSelect.value;
+        C.reset(groupeSelect, 'Tous les groupes');
+        var gu = aid ? '/api/v1/hierarchy/groupes?annee_id='     + aid
+               : fc  ? '/api/v1/hierarchy/groupes?filiere_code=' + fc
+               : pid  ? '/api/v1/hierarchy/groupes?pole_id='      + pid : null;
+        if (!gu) return;
+        C.json(gu).then(function (g) { C.populate(groupeSelect, g, 'id', 'code', 'Tous les groupes', selGroupe); });
     });
 });
 </script>

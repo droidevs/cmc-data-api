@@ -55,10 +55,10 @@ class StoreNoteRequest extends FormRequest
         $validator->after(function (Validator $validator) {
             $seance = Seance::find($this->input('seance_id'));
 
-            if ($seance && ! in_array($seance->type, Note::EVALUABLE_SEANCE_TYPES, true)) {
+            if ($seance && ! in_array($seance->type?->value ?? $seance->type, \App\Enums\NoteType::evaluable(), true)) {
                 $validator->errors()->add(
                     'seance_id',
-                    'Impossible de créer une note pour une séance de cours. Choisissez une séance CC, EFM ou examen.'
+                    'Impossible de créer une note pour une séance de cours. Choisissez une séance CC ou EFM.'
                 );
             }
         });

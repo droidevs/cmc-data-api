@@ -90,15 +90,15 @@ class NoteService extends BaseService
             ]);
         }
 
-        if (! in_array($seance->type, Note::EVALUABLE_SEANCE_TYPES, true)) {
+        if (! in_array($seance->type?->value ?? $seance->type, \App\Enums\NoteType::evaluable(), true)) {
             throw ValidationException::withMessages([
-                'seance_id' => "Impossible de créer une note pour une séance de type \"{$seance->type}\". ".
-                    'Seules les séances cc, efm ou exam peuvent recevoir des notes.',
+                'seance_id' => "Impossible de créer une note pour une séance de type \"{$seance->type?->value}\". ".
+                    'Seules les séances cc ou efm peuvent recevoir des notes.',
             ]);
         }
 
         // The note's type is not a free choice — it always mirrors the
         // séance it belongs to, even if the client sent a different value.
-        return $seance->type;
+        return $seance->type?->value ?? $seance->type;
     }
 }

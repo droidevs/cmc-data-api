@@ -38,10 +38,10 @@ class UpdateNoteRequest extends FormRequest
             $seanceId = $this->input('seance_id', $note?->seance_id);
             $seance = Seance::find($seanceId);
 
-            if ($seance && ! in_array($seance->type, Note::EVALUABLE_SEANCE_TYPES, true)) {
+            if ($seance && ! in_array($seance->type?->value ?? $seance->type, \App\Enums\NoteType::evaluable(), true)) {
                 $validator->errors()->add(
                     'seance_id',
-                    'Impossible de créer une note pour une séance de cours. Choisissez une séance CC, EFM ou examen.'
+                    'Impossible de modifier une note pour une séance de cours. Choisissez une séance CC ou EFM.'
                 );
             }
         });

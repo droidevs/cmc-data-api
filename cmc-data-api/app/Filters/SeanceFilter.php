@@ -18,6 +18,8 @@ namespace App\Filters;
  *   module_code        - via affectation.module_code
  *   formateur_mle      - via affectation.formateur_mle or formateur_mle_syn
  *   pole_id            - via affectation.groupe.annee.filiere.pole_id
+ *   filiere_code       - via affectation.groupe.annee.filiere_code
+ *   annee_id           - via affectation.groupe.annee_id
  *   has_notes          - 1 | 0
  *   weekday            - 0 (Sunday) - 6 (Saturday), or comma list
  *   sort               - date|created_at (prefix "-" for desc)
@@ -27,19 +29,21 @@ class SeanceFilter extends QueryFilter
     protected function filters(): array
     {
         return [
-            'type' => 'filterType',
-            'date' => 'filterDate',
-            'date_from' => 'filterDateFrom',
-            'date_to' => 'filterDateTo',
-            'espace_id' => 'filterEspaceId',
-            'time_range_id' => 'filterTimeRangeId',
-            'affectation_id' => 'filterAffectationId',
-            'groupe_id' => 'filterGroupeId',
-            'module_code' => 'filterModuleCode',
-            'formateur_mle' => 'filterFormateurMle',
-            'pole_id' => 'filterPoleId',
-            'has_notes' => 'filterHasNotes',
-            'weekday' => 'filterWeekday',
+            'type'             => 'filterType',
+            'date'             => 'filterDate',
+            'date_from'        => 'filterDateFrom',
+            'date_to'          => 'filterDateTo',
+            'espace_id'        => 'filterEspaceId',
+            'time_range_id'    => 'filterTimeRangeId',
+            'affectation_id'   => 'filterAffectationId',
+            'groupe_id'        => 'filterGroupeId',
+            'module_code'      => 'filterModuleCode',
+            'formateur_mle'    => 'filterFormateurMle',
+            'pole_id'          => 'filterPoleId',
+            'filiere_code'     => 'filterFiliereCode',
+            'annee_id'         => 'filterAnneeId',
+            'has_notes'        => 'filterHasNotes',
+            'weekday'          => 'filterWeekday',
         ];
     }
 
@@ -106,6 +110,16 @@ class SeanceFilter extends QueryFilter
     protected function filterPoleId(mixed $value): void
     {
         $this->builder->whereHas('affectation.groupe.annee.filiere', fn ($q) => $q->where('pole_id', $value));
+    }
+
+    protected function filterFiliereCode(mixed $value): void
+    {
+        $this->builder->whereHas('affectation.groupe.annee', fn ($q) => $q->where('filiere_code', $value));
+    }
+
+    protected function filterAnneeId(mixed $value): void
+    {
+        $this->builder->whereHas('affectation.groupe', fn ($q) => $q->where('annee_id', $value));
     }
 
     protected function filterHasNotes(mixed $value): void

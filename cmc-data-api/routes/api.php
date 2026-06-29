@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\EspaceController;
 use App\Http\Controllers\Api\FiliereController;
 use App\Http\Controllers\Api\FormateurController;
 use App\Http\Controllers\Api\GroupeController;
+use App\Http\Controllers\Api\HierarchyController;
 use App\Http\Controllers\Api\ModuleController;
 use App\Http\Controllers\Api\NiveauController;
 use App\Http\Controllers\Api\NoteController;
@@ -77,6 +78,19 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('seances', SeanceController::class);
 
     Route::apiResource('notes', NoteController::class);
+
+    // ─── Hierarchy / Cascade endpoints for UI ─────────────────────────────
+    Route::prefix('hierarchy')->group(function () {
+        Route::get('poles', [HierarchyController::class, 'getPoles']);
+        Route::get('filieres', [HierarchyController::class, 'getFilieres']);
+        Route::get('annees', [HierarchyController::class, 'getAnnees']);
+        Route::get('groupes', [HierarchyController::class, 'getGroupes']);
+        Route::get('modules', [HierarchyController::class, 'getModules']);
+        Route::get('stagiaires', [HierarchyController::class, 'getStagiaires']);
+        Route::get('seances', [HierarchyController::class, 'getSeances']);
+        Route::get('resolve/stagiaire/{cef}', [HierarchyController::class, 'resolveStagiaire']);
+        Route::get('resolve/groupe/{id}', [HierarchyController::class, 'resolveGroupe']);
+    });
 
     // ─── Import ────────────────────────────────────────────────────────────
     Route::post('import', [ImportController::class, 'import'])->name('import');

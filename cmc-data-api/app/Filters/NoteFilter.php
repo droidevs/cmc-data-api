@@ -32,6 +32,9 @@ class NoteFilter extends QueryFilter
             'passing' => 'filterPassing',
             'missing' => 'filterMissing',
             'groupe_id' => 'filterGroupeId',
+            'pole_id' => 'filterPoleId',
+            'filiere_code' => 'filterFiliereCode',
+            'annee_id' => 'filterAnneeId',
         ];
     }
 
@@ -91,5 +94,20 @@ class NoteFilter extends QueryFilter
     protected function filterGroupeId(mixed $value): void
     {
         $this->builder->whereHas('stagiaire', fn ($q) => $q->where('groupe_id', $value));
+    }
+
+    protected function filterPoleId(mixed $value): void
+    {
+        $this->builder->whereHas('stagiaire.groupe.annee.filiere', fn ($q) => $q->where('pole_id', $value));
+    }
+
+    protected function filterFiliereCode(mixed $value): void
+    {
+        $this->builder->whereHas('stagiaire.groupe.annee', fn ($q) => $q->where('filiere_code', $value));
+    }
+
+    protected function filterAnneeId(mixed $value): void
+    {
+        $this->builder->whereHas('stagiaire.groupe', fn ($q) => $q->where('annee_id', $value));
     }
 }

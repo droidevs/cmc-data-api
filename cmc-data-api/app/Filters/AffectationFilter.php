@@ -38,6 +38,7 @@ class AffectationFilter extends QueryFilter
             'mh_totale_max' => 'filterMhTotaleMax',
             'pole_id' => 'filterPoleId',
             'filiere_code' => 'filterFiliereCode',
+            'annee_id' => 'filterAnneeId',
             'has_seances' => 'filterHasSeances',
         ];
     }
@@ -124,5 +125,10 @@ class AffectationFilter extends QueryFilter
         } else {
             $this->builder->doesntHave('seances');
         }
+    }
+
+    protected function filterAnneeId(mixed $value): void
+    {
+        $this->builder->whereHas('groupe', fn ($q) => $q->where('annee_id', $value));
     }
 }

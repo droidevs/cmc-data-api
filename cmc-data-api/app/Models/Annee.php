@@ -4,21 +4,24 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Annee represents one academic year within a Filiere.
+ * Annee represents one academic year (optionally with a specialization
+ * option) within a Filiere.
+ *
+ * A Filiere only models the GENERAL training program (e.g. "Développement
+ * Digital"); any option/specialization is expressed in the Annee label
+ * itself, e.g.:
+ *   - "1ère année - Tronc Commun"
+ *   - "2ème année - Option Développement Web Full Stack"
  *
  * Excel mapping (AvancementProgramme):
- *   Année de formation → libelle  (integer: 1, 2)
- *   Code Filière       → filiere_code
- *
- * Stored as an integer (1 or 2); use `formattedLabel()` for the French
- * human-readable form ("1ère année" / "2ème année").
+ *   Année de formation + Code Filière → libelle (combined into a string)
+ *   Code Filière (general)           → filiere_code
  */
 class Annee extends Model
 {
@@ -26,15 +29,8 @@ class Annee extends Model
 
     protected $fillable = [
         'filiere_code',
-        'libelle',       // integer year (1 or 2)
+        'libelle',       // human-readable year + option label
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'libelle' => 'integer',
-        ];
-    }
 
     // ─── Relationships ────────────────────────────────────────────────────────
 
@@ -54,23 +50,5 @@ class Annee extends Model
     public function modules(): HasMany
     {
         return $this->hasMany(Module::class);
-    }
-
-    // ─── Accessors ────────────────────────────────────────────────────────────
-
-    /**
-     * Human-readable French label: "1ère année", "2ème année".
-     * Use this accessor in views; avoid adding to $appends to prevent
-     * polluting array/JSON serialisation.
-     */
-    protected function label(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => match ($this->libelle) {
-                1       => '1ère année',
-                2       => '2ème année',
-                default => "{$this->libelle}ème année",
-            },
-        );
     }
 }

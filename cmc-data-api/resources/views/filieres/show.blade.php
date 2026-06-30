@@ -77,7 +77,7 @@
                 @foreach($filiere->annees as $annee)
                     <tr>
                         <td>
-                            <span class="badge badge-indigo" style="font-size:13px">{{ $annee->label }}</span>
+                            <span class="badge badge-indigo" style="font-size:13px">{{ $annee->libelle }}</span>
                         </td>
                         <td>
                             <a href="{{ route('web.groupes.index', ['filiere_code' => $filiere->code_filiere, 'annee_id' => $annee->id]) }}"

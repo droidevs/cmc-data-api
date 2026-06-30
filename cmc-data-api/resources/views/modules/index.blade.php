@@ -103,7 +103,7 @@
                             @endif
                         </td>
                         <td>
-                            <span class="badge badge-gray">{{ $module->annee?->label ?? '—' }}</span>
+                            <span class="badge badge-gray">{{ $module->annee?->libelle ?? '—' }}</span>
                         </td>
                         <td>
                             @if($module->regional)

@@ -41,7 +41,7 @@
                 </div>
                 <div class="detail-field">
                     <div class="detail-field-label">Année de formation</div>
-                    <div class="detail-field-value">{{ $groupe->annee?->label ?? '—' }}</div>
+                    <div class="detail-field-value">{{ $groupe->annee?->libelle ?? '—' }}</div>
                 </div>
                 @if($groupe->annee?->filiere)
                     @php $filiere = $groupe->annee->filiere; @endphp

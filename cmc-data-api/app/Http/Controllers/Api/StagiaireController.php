@@ -7,6 +7,7 @@ use App\Http\Resources\StagiaireResource;
 use App\Models\Stagiaire;
 use App\Services\StagiaireService;
 use Illuminate\Http\Request;
+use function PHPUnit\Framework\isEmpty;
 
 /**
  * Stagiaire data is sourced from lister_minimized.xlsx / BasePlateEvaluation.xlsx.

@@ -29,7 +29,7 @@ class AffectationController
     {
         $affectation = $this->service->create($request->validated());
 
-        return (new AffectationResource($affectation))
+        return new AffectationResource($affectation)
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }

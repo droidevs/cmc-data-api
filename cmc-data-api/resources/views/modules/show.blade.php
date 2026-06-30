@@ -48,7 +48,7 @@
                 @if($module->annee)
                     <div class="detail-field">
                         <div class="detail-field-label">Année de formation</div>
-                        <div class="detail-field-value">{{ $module->annee->label }}</div>
+                        <div class="detail-field-value">{{ $module->annee->libelle }}</div>
                     </div>
                 @endif
                 @if($module->annee?->filiere)

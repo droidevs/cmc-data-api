@@ -50,7 +50,7 @@ class HierarchyController
         $formatted = $annees->map(fn ($annee) => [
             'id'           => $annee->id,
             'libelle'      => $annee->libelle,
-            'label'        => $annee->label,
+            'label'        => $annee->libelle,
             'filiere_code' => $annee->filiere_code
         ]);
 
@@ -117,7 +117,7 @@ class HierarchyController
         }
 
         $stagiaires = $query->orderBy('nom')->get(['cef', 'nom', 'prenom', 'groupe_id']);
-        
+
         $formatted = $stagiaires->map(fn ($s) => [
             'cef' => $s->cef,
             'nom' => $s->nom,

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Affectation;
+use App\Models\Espace;
 use App\Models\Formateur;
 use App\Models\Groupe;
 use App\Models\Module;
@@ -81,9 +82,11 @@ class PlanningSeeder extends Seeder
                         },
                     ]);
 
+                // find espaces using pole id
                 // 5 seances per affectation with (date + time_range)
                 Seance::factory()
                     ->count(5)
+                    // assign espace random from the espaces list for the pole to seance
                     ->for($affectation)
                     ->state(fn () => [
                         'time_range_id' => $timeRanges->random()->getKey(),

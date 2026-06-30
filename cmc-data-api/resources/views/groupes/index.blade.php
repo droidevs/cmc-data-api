@@ -94,7 +94,7 @@
                             @endif
                         </td>
                         <td>
-                            <span class="badge badge-gray">{{ $groupe->annee?->label ?? '—' }}</span>
+                            <span class="badge badge-gray">{{ $groupe->annee?->libelle ?? '—' }}</span>
                         </td>
                         <td>
                             @if($groupe->mode)

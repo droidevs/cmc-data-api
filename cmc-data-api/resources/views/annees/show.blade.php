@@ -1,16 +1,16 @@
 @extends('layouts.app')
 
-@section('title', $annee->label)
+@section('title', $annee->libelle)
 @section('breadcrumb')
     <a href="{{ route('web.annees.index') }}">Années</a>
     <span class="topbar-sep">/</span>
-    <span class="current">{{ $annee->label }}</span>
+    <span class="current">{{ $annee->libelle }}</span>
 @endsection
 
 @section('content')
     <div class="page-header">
         <div>
-            <h1 class="page-title">{{ $annee->label }}</h1>
+            <h1 class="page-title">{{ $annee->libelle }}</h1>
             <p class="page-subtitle">
                 Année #{{ $annee->id }}
                 @if($annee->filiere) · {{ $annee->filiere->libelle }} @endif
@@ -24,7 +24,7 @@
             <div class="detail-grid thirds">
                 <div class="detail-field">
                     <div class="detail-field-label">Libellé</div>
-                    <div class="detail-field-value">{{ $annee->label }}</div>
+                    <div class="detail-field-value">{{ $annee->libelle }}</div>
                 </div>
                 <div class="detail-field">
                     <div class="detail-field-label">Filière</div>

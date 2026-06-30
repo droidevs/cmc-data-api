@@ -12,8 +12,9 @@ return new class extends Migration
     {
         Schema::create('annees', function (Blueprint $table) {
             $table->id();
-            // Stored as an integer year number (1, 2 …); human label is a model accessor.
-            $table->unsignedTinyInteger('libelle');
+            // Human-readable label, e.g. "1ère année - Tronc Commun"
+            // or "2ème année - Option Développement Web Full Stack".
+            $table->string('libelle');
             $table->string('filiere_code', 32);
             $table->timestamps();
 

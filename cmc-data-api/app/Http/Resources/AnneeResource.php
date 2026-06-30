@@ -14,12 +14,8 @@ class AnneeResource extends JsonResource
         return [
             'id'           => $this->id,
             'filiere_code' => $this->filiere_code,
-
-            // Integer year (1 or 2) from AvancementProgramme "Année de formation"
-            'libelle'      => $this->libelle,
-
             // Human-readable French label: "1ère année" / "2ème année"
-            'label'        => $this->label,
+            'libelle'        => $this->libelle,
 
             'created_at'   => $this->created_at,
             'updated_at'   => $this->updated_at,

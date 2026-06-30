@@ -26,12 +26,12 @@ class FiliereFactory extends Factory
     /** @var array<string, array{libelle: string, secteur: string}> */
     private static array $realFilieres = [
         'DIA_DEV_TS'     => ['libelle' => 'Développement Digital',                                          'secteur' => 'Digital et Intelligence Artificielle'],
-        'DIA_DEVOAM_TS'  => ['libelle' => 'Développement Digital option Applications Mobiles',              'secteur' => 'Digital et Intelligence Artificielle'],
-        'DIA_DEVOWFS_TS' => ['libelle' => 'Développement Digital option Web Full Stack',                    'secteur' => 'Digital et Intelligence Artificielle'],
+//        'DIA_DEVOAM_TS'  => ['libelle' => 'Développement Digital option Applications Mobiles',              'secteur' => 'Digital et Intelligence Artificielle'],
+//        'DIA_DEVOWFS_TS' => ['libelle' => 'Développement Digital option Web Full Stack',                    'secteur' => 'Digital et Intelligence Artificielle'],
         'DIA_ID_TS'      => ['libelle' => 'Infrastructure Digitale',                                        'secteur' => 'Digital et Intelligence Artificielle'],
-        'DIA_IDOCS_TS'   => ['libelle' => 'Infrastructure Digitale option Cyber sécurité',                  'secteur' => 'Digital et Intelligence Artificielle'],
-        'DIA_IDOSR_TS'   => ['libelle' => 'Infrastructure Digitale option Systèmes et Réseaux',             'secteur' => 'Digital et Intelligence Artificielle'],
-        'DIA_IDOCC_TS'   => ['libelle' => 'Infrastructure Digitale option  Cloud Computing',                'secteur' => 'Digital et Intelligence Artificielle'],
+//        'DIA_IDOCS_TS'   => ['libelle' => 'Infrastructure Digitale option Cyber sécurité',                  'secteur' => 'Digital et Intelligence Artificielle'],
+//        'DIA_IDOSR_TS'   => ['libelle' => 'Infrastructure Digitale option Systèmes et Réseaux',             'secteur' => 'Digital et Intelligence Artificielle'],
+//        'DIA_IDOCC_TS'   => ['libelle' => 'Infrastructure Digitale option  Cloud Computing',                'secteur' => 'Digital et Intelligence Artificielle'],
     ];
 
     /** @var array<string, array{libelle: string, secteur: string}> Additional filieres for seeding variety */
@@ -39,7 +39,6 @@ class FiliereFactory extends Factory
         'GC_MCA_TS'      => ['libelle' => 'Management Commercial et Action de Vente',                       'secteur' => 'Commerce et Distribution'],
         'GC_CCA_TS'      => ['libelle' => 'Comptabilité et Contrôle de Gestion',                           'secteur' => 'Gestion et Commerce'],
         'BTP_TP_TS'      => ['libelle' => 'Travaux Publics',                                               'secteur' => 'Bâtiment et Travaux Publics'],
-        'ME_EMO_TS'      => ['libelle' => 'Électromécanique des engins motorisés option Machinisme Agr.',  'secteur' => 'Mécanique et Électromécanique'],
     ];
 
     public function definition(): array

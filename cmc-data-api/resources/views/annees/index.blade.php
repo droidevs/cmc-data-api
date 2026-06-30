@@ -25,14 +25,6 @@
                     <option value="">Toutes les filières</option>
                 </select>
             </div>
-            <div class="filter-group">
-                <label class="filter-label" for="filter-libelle">Année</label>
-                <select id="filter-libelle" name="libelle" class="filter-select">
-                    <option value="">Toutes les années</option>
-                    <option value="1" @selected(request('libelle') === '1')>1ère année</option>
-                    <option value="2" @selected(request('libelle') === '2')>2ème année</option>
-                </select>
-            </div>
             <div class="filter-actions">
                 <button type="submit" class="btn btn-primary">Filtrer</button>
                 <a href="{{ route('web.annees.index') }}" class="btn btn-outline">Réinitialiser</a>
@@ -63,7 +55,7 @@
                     <tr>
                         <td>
                             <a href="{{ route('web.annees.show', $annee) }}" class="table-link">
-                                <span class="badge badge-indigo">{{ $annee->label }}</span>
+                                <span class="badge badge-indigo">{{ $annee->libelle }}</span>
                             </a>
                         </td>
                         <td>

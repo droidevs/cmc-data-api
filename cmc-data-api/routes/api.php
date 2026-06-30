@@ -97,3 +97,12 @@ Route::prefix('v1')->group(function () {
     Route::post('import', [ImportController::class, 'import'])->name('import');
 
 });
+
+Route::get('/test', function () {
+    dd([
+        'REQUEST_URI' => $_SERVER['REQUEST_URI'] ?? null,
+        'QUERY_STRING' => $_SERVER['QUERY_STRING'] ?? null,
+        'REQUEST_METHOD' => $_SERVER['REQUEST_METHOD'] ?? null,
+        '_GET' => $_GET,
+    ]);
+});

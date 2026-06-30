@@ -18,6 +18,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Validate composer.json and composer.lock
+      working-directory: cmc-data-api
       run: composer validate --strict
 
     - name: Cache Composer packages

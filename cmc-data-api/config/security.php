@@ -6,7 +6,7 @@ return [
 
     'trusted_origins' => array_values(array_filter(array_map(
         'trim',
-        explode(',', (string) env('SECURITY_TRUSTED_ORIGINS', env('APP_URL', 'http://localhost:3000')))
+        explode(',', (string) env('SECURITY_TRUSTED_ORIGINS', env('APP_URL', 'http://127.0.0.1:9000')))
     ))),
 
     'csrf' => [

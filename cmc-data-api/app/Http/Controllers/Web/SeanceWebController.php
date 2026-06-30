@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Http\Requests\Filters\SeanceFilterRequest;
 use App\Http\Requests\Seance\StoreSeanceRequest;
 use App\Http\Requests\Seance\UpdateSeanceRequest;
 use App\Models\Affectation;
@@ -15,7 +16,7 @@ class SeanceWebController extends WebController
 {
     public function __construct(private SeanceService $service) {}
 
-    public function index(Request $request)
+    public function index(SeanceFilterRequest $request)
     {
         return view('seances.index', $this->service->list($request));
     }

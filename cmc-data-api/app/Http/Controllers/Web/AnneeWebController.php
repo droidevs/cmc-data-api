@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Http\Requests\Filters\AnneeFilterRequest;
 use App\Models\Annee;
 use App\Services\AnneeService;
 use Illuminate\Http\Request;
@@ -14,7 +15,7 @@ class AnneeWebController extends WebController
 {
     public function __construct(private AnneeService $service) {}
 
-    public function index(Request $request)
+    public function index(AnneeFilterRequest $request)
     {
         return view('annees.index', $this->service->list($request));
     }

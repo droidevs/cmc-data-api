@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Http\Requests\Filters\NiveauFilterRequest;
 use App\Models\Niveau;
 use App\Services\NiveauService;
 use Illuminate\Http\Request;
@@ -14,7 +15,7 @@ class NiveauWebController extends WebController
 {
     public function __construct(private NiveauService $service) {}
 
-    public function index(Request $request)
+    public function index(NiveauFilterRequest $request)
     {
         return view('niveaux.index', $this->service->list($request));
     }

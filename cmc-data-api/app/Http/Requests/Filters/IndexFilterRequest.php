@@ -93,7 +93,7 @@ abstract class IndexFilterRequest extends FormRequest
      */
     final public function rules(): array
     {
-        return array_merge($this->filterRules(), [
+        return array_merge($this->makeNullable($this->filterRules()), [
             'per_page' => ['sometimes', 'integer', 'min:1', 'max:'.self::MAX_PER_PAGE],
             'page' => ['sometimes', 'integer', 'min:1'],
             'sort' => ['sometimes', 'string', 'max:200', $this->sortRule()],
@@ -101,6 +101,18 @@ abstract class IndexFilterRequest extends FormRequest
         ]);
     }
 
+    protected function makeNullable(array $rules): array
+    {
+        return array_map(function ($ruleSet) {
+            $ruleSet = (array) $ruleSet;
+
+            if (!in_array('nullable', $ruleSet, true)) {
+                array_unshift($ruleSet, 'nullable');
+            }
+
+            return $ruleSet;
+        }, $rules);
+    }
     /**
      * Reject any query param not explicitly declared as a rule. This is
      * the main hardening over the current QueryFilter, which silently

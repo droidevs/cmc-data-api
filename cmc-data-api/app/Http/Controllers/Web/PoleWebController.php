@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Http\Requests\Filters\PoleFilterRequest;
 use App\Models\Pole;
 use App\Services\PoleService;
 use Illuminate\Http\Request;
@@ -10,7 +11,7 @@ class PoleWebController extends WebController
 {
     public function __construct(private PoleService $service) {}
 
-    public function index(Request $request)
+    public function index(PoleFilterRequest $request)
     {
         return view('poles.index', $this->service->list($request));
     }

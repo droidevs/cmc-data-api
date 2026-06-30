@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Requests\Affectation\StoreAffectationRequest;
 use App\Http\Requests\Affectation\UpdateAffectationRequest;
+use App\Http\Requests\Filters\AffectationFilterRequest;
 use App\Models\Affectation;
 use App\Models\Formateur;
 use App\Models\Groupe;
@@ -15,7 +16,7 @@ class AffectationWebController extends WebController
 {
     public function __construct(private AffectationService $service) {}
 
-    public function index(Request $request)
+    public function index(AffectationFilterRequest $request)
     {
         return view('affectations.index', $this->service->list($request));
     }

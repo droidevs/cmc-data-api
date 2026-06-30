@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\EspaceWebController;
 use App\Http\Controllers\Web\FiliereWebController;
 use App\Http\Controllers\Web\FormateurWebController;
 use App\Http\Controllers\Web\GroupeWebController;
+use App\Http\Controllers\Web\ImportWebController;
 use App\Http\Controllers\Web\ModuleWebController;
 use App\Http\Controllers\Web\NiveauWebController;
 use App\Http\Controllers\Web\NoteWebController;
@@ -34,6 +35,7 @@ Route::prefix('dashboard')->name('web.')->group(function () {
     Route::resource('niveaux',        NiveauWebController::class)       ->only(['index', 'show'])->names('niveaux');
     Route::resource('type-formations', TypeFormationWebController::class)->only(['index', 'show'])->names('type-formations');
 
+    Route::resource('imports', ImportWebController::class)->only(['index'])->names('imports');
     // ─── Full CRUD resources ──────────────────────────────────────────────
     Route::resource('affectations', AffectationWebController::class)->names('affectations');
     Route::resource('seances',      SeanceWebController::class)     ->names('seances');

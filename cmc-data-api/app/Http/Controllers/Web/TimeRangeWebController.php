@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Http\Requests\Filters\TimeRangeFilterRequest;
 use App\Http\Requests\TimeRange\StoreTimeRangeRequest;
 use App\Http\Requests\TimeRange\UpdateTimeRangeRequest;
 use App\Models\TimeRange;
@@ -12,7 +13,7 @@ class TimeRangeWebController extends WebController
 {
     public function __construct(private TimeRangeService $service) {}
 
-    public function index(Request $request)
+    public function index(TimeRangeFilterRequest $request)
     {
         return view('time-ranges.index', $this->service->list($request));
     }

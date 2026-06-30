@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Requests\Espace\StoreEspaceRequest;
 use App\Http\Requests\Espace\UpdateEspaceRequest;
+use App\Http\Requests\Filters\EspaceFilterRequest;
 use App\Models\Espace;
 use App\Models\Pole;
 use App\Services\EspaceService;
@@ -13,7 +14,7 @@ class EspaceWebController extends WebController
 {
     public function __construct(private EspaceService $service) {}
 
-    public function index(Request $request)
+    public function index(EspaceFilterRequest $request)
     {
         return view('espaces.index', $this->service->list($request));
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Http\Requests\Filters\FormateurFilterRequest;
 use App\Models\Formateur;
 use App\Services\FormateurService;
 use Illuminate\Http\Request;
@@ -10,7 +11,7 @@ class FormateurWebController extends WebController
 {
     public function __construct(private FormateurService $service) {}
 
-    public function index(Request $request)
+    public function index(FormateurFilterRequest $request)
     {
         return view('formateurs.index', $this->service->list($request));
     }

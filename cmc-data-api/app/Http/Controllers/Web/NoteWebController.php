@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Http\Requests\Filters\NoteFilterRequest;
 use App\Http\Requests\Note\StoreNoteRequest;
 use App\Http\Requests\Note\UpdateNoteRequest;
 use App\Models\Note;
@@ -14,7 +15,7 @@ class NoteWebController extends WebController
 {
     public function __construct(private NoteService $service) {}
 
-    public function index(Request $request)
+    public function index(NoteFilterRequest $request)
     {
         return view('notes.index', $this->service->list($request));
     }

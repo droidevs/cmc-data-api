@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Http\Requests\Filters\GroupeFilterRequest;
 use App\Models\Groupe;
 use App\Services\GroupeService;
 use Illuminate\Http\Request;
@@ -10,7 +11,7 @@ class GroupeWebController extends WebController
 {
     public function __construct(private GroupeService $service) {}
 
-    public function index(Request $request)
+    public function index(GroupeFilterRequest $request)
     {
         return view('groupes.index', $this->service->list($request));
     }

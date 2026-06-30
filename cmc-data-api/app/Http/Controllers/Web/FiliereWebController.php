@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Http\Requests\Filters\FiliereFilterRequest;
 use App\Models\Filiere;
 use App\Services\FiliereService;
 use Illuminate\Http\Request;
@@ -10,7 +11,7 @@ class FiliereWebController extends WebController
 {
     public function __construct(private FiliereService $service) {}
 
-    public function index(Request $request)
+    public function index(FiliereFilterRequest $request)
     {
         return view('filieres.index', $this->service->list($request));
     }

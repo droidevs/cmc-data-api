@@ -159,33 +159,63 @@ class ImportService
     /**
      * Map an Excel row to a Formateur record.
      *
-     * Expected (normalised) column names:
-     *   mle | matricule          → mle (PK)
-     *   nom_et_prenom | nom_prenom → nom_prenom
-     *   mhs                      → mhs
-     *   statut                   → statut
-     *   affectation              → pole.libelle (home pole)
-     *   efp_mutualise | efp_mu   → efp_mutualise
-     *   mutualise | mutualise_   → mutualise
-     *   email_edu | email        → email_edu
+     * Expected (normalised) column names — covers both a plain "formateurs"
+     * export (mle / nom_et_prenom / ...) and a module-progress report such
+     * as "AvancementProgramme" (mle_affecte_presentiel_actif / ...):
+     *
+     *   mle | matricule | mle_affecte_presentiel_actif | mle_affecte_syn_actif
+     *                              → mle (PK)
+     *   nom_et_prenom | nom_prenom | formateur_affecte_presentiel_actif
+     *      | formateur_affecte_syn_actif
+     *                              → nom_prenom
+     *   mhs | mh_totale_drif | mh_totale_presentiel
+     *                              → mhs
+     *   statut | statut_sous_groupe → statut
+     *   affectation | secteur | regional
+     *                              → pole.libelle (home pole)
+     *   efp_mutualise | efp_mu    → efp_mutualise
+     *   mutualise                 → mutualise
+     *   email_edu | email         → email_edu
+     *
+     * Rows where no Mle can be found at all (e.g. a module-progress line
+     * where no trainer has been assigned yet) are silently skipped rather
+     * than treated as an error, since that is a valid/expected state for
+     * report-style exports.
      *
      * @return 'inserted'|'updated'|'skipped'
      */
     private function importFormateurRow(array $row, string $mode): string
     {
-        $mle = $this->cell($row, ['mle', 'matricule', 'mle_']);
+        $mle = $this->cell($row, [
+            'mle',
+            'matricule',
+            'mle_',
+            'mle_affecte_presentiel_actif',
+            'mle_affecte_syn_actif',
+        ]);
+
+        // No trainer assigned on this row (common in progress-report style
+        // exports where a module simply has no one assigned yet) — skip
+        // rather than error.
         if (empty($mle)) {
-            throw new \InvalidArgumentException('Missing required field: Mle (matricule).');
+            return 'skipped';
         }
         $mle = (string) $mle;
 
-        $nomPrenom = $this->cell($row, ['nom_et_prenom', 'nom_prenom', 'nom_et_prenom_', 'nom_prenom_']);
+        $nomPrenom = $this->cell($row, [
+            'nom_et_prenom',
+            'nom_prenom',
+            'nom_et_prenom_',
+            'nom_prenom_',
+            'formateur_affecte_presentiel_actif',
+            'formateur_affecte_syn_actif',
+        ]);
         if (empty($nomPrenom)) {
             throw new \InvalidArgumentException("Row Mle={$mle}: Missing required field: Nom et Prénom.");
         }
 
         // ── Resolve Pole (create if missing) ──────────────────────────────────
-        $poleLibelle = $this->cell($row, ['affectation', 'pole', 'secteur']);
+        $poleLibelle = $this->cell($row, ['affectation', 'pole', 'secteur', 'regional']);
         $poleId      = null;
         if (!empty($poleLibelle)) {
             $pole   = Pole::firstOrCreate(['libelle' => trim((string) $poleLibelle)]);
@@ -200,9 +230,14 @@ class ImportService
         $payload = [
             'pole_id'       => $poleId,
             'nom_prenom'    => trim((string) $nomPrenom),
-            'statut'        => trim((string) ($this->cell($row, ['statut']) ?? '')),
+            'statut'        => trim((string) ($this->cell($row, ['statut', 'statut_sous_groupe']) ?? '')),
             'email_edu'     => trim((string) ($this->cell($row, ['email_edu', 'email']) ?? '')),
-            'mhs'           => $this->parseDecimal($this->cell($row, ['mhs'])),
+            'mhs'           => $this->parseDecimal($this->cell($row, [
+                'mhs',
+                'mh_totale_drif',
+                'mh_totale_presentiel',
+                'mh_affectee_globale_p_syn',
+            ])),
             'efp_mutualise' => trim((string) ($this->cell($row, ['efp_mutualise', 'efp_mu', 'efp_mutualise_']) ?? '')),
             'mutualise'     => $mutualise,
         ];
@@ -328,7 +363,7 @@ class ImportService
         }
 
         // ── TypeFormation ─────────────────────────────────────────────────────
-        $typeLibelle  = $this->cell($row, ['type_di', 'type_formation', 'typeformation', 'type_di_']);
+        $typeLibelle  = $this->cell($row, ['type_di', 'type_formation', 'typeformation', 'type_di_', 'type_de_formation']);
         $typeFormation = null;
         if (!empty($typeLibelle)) {
             $typeFormation = TypeFormation::firstOrCreate(['libelle' => trim((string) $typeLibelle)]);

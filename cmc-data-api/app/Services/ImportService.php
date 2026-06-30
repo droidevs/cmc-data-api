@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\FormateurStatut;
 use App\Models\Annee;
 use App\Models\Filiere;
 use App\Models\Formateur;
@@ -230,7 +231,7 @@ class ImportService
         $payload = [
             'pole_id'       => $poleId,
             'nom_prenom'    => trim((string) $nomPrenom),
-            'statut'        => trim((string) ($this->cell($row, ['statut', 'statut_sous_groupe']) ?? '')),
+            'statut'        => $this->parseFormateurStatut($this->cell($row, ['statut'])),
             'email_edu'     => trim((string) ($this->cell($row, ['email_edu', 'email']) ?? '')),
             'mhs'           => $this->parseDecimal($this->cell($row, [
                 'mhs',
@@ -466,6 +467,31 @@ class ImportService
             }
         }
         return null;
+    }
+
+    /**
+     * Map a raw "Statut" cell value to a valid FormateurStatut enum value.
+     *
+     * Spreadsheets in the wild use varying labels (accents, case, synonyms,
+     * or — when the wrong column gets matched, e.g. a group's "Actif" /
+     * "Inactif" status — values that aren't a FormateurStatut at all). Any
+     * value that doesn't map to a known case is dropped (returns null)
+     * rather than being written raw and blowing up the enum cast.
+     */
+    private function parseFormateurStatut(mixed $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $normalized = $this->normalizeHeader((string) $value); // reuse accent/case normalizer
+
+        return match ($normalized) {
+            'ofppt', 'permanent', 'titulaire' => FormateurStatut::Ofppt->value,
+            'vacataire' => FormateurStatut::Vacataire->value,
+            'contractuel' => FormateurStatut::Contractuel->value,
+            default => null,
+        };
     }
 
     private function parseBool(mixed $value): ?bool

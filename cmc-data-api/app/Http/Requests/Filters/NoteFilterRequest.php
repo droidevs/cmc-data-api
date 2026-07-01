@@ -11,7 +11,7 @@ use App\Rules\CsvOfStrings;
 class NoteFilterRequest extends IndexFilterRequest
 {
     /** Per NoteResource docblock: cc | efm | tp | th | syn | exam. */
-    private const TYPES = ['cc', 'efm', 'tp', 'th', 'syn', 'exam'];
+    private const TYPES = ['cc', 'efm'];
 
     /** Per NoteResource docblock DECISION values. */
     private const DECISIONS = ['Admis', 'Redoublant', 'Abandon', 'Rattrapage'];

@@ -173,7 +173,7 @@ routes/
 ### Clone the repository
 
 ```bash
-git clone https://github.com/your-username/cmc-data-api.git
+git clone https://github.com/droidevs/cmc-data-api.git
 cd cmc-data-api
 ```
 
